@@ -1,47 +1,5 @@
-const countryData = {
-  Poland: {
-    currency: "PLN",
-    annualMarketReturn: 0.075,
-    annualHomeGrowth: 0.035,
-    mortgageRate: 0.065,
-  },
-  Germany: {
-    currency: "EUR",
-    annualMarketReturn: 0.06,
-    annualHomeGrowth: 0.025,
-    mortgageRate: 0.045,
-  },
-  France: {
-    currency: "EUR",
-    annualMarketReturn: 0.058,
-    annualHomeGrowth: 0.027,
-    mortgageRate: 0.042,
-  },
-  Spain: {
-    currency: "EUR",
-    annualMarketReturn: 0.06,
-    annualHomeGrowth: 0.03,
-    mortgageRate: 0.047,
-  },
-  Italy: {
-    currency: "EUR",
-    annualMarketReturn: 0.055,
-    annualHomeGrowth: 0.022,
-    mortgageRate: 0.049,
-  },
-  Netherlands: {
-    currency: "EUR",
-    annualMarketReturn: 0.062,
-    annualHomeGrowth: 0.03,
-    mortgageRate: 0.041,
-  },
-  Sweden: {
-    currency: "SEK",
-    annualMarketReturn: 0.065,
-    annualHomeGrowth: 0.028,
-    mortgageRate: 0.044,
-  },
-};
+let countryData = {};
+let sourceLinks = [];
 
 const elements = {
   country: document.getElementById("country"),
@@ -59,6 +17,7 @@ const elements = {
   homeGrowth: document.getElementById("home-growth"),
   mortgageRate: document.getElementById("mortgage-rate"),
   mortgagePayment: document.getElementById("mortgage-payment"),
+  sources: document.getElementById("data-sources"),
 };
 
 const formatCurrency = (value, currency) =>
@@ -71,6 +30,32 @@ const formatCurrency = (value, currency) =>
 const toNumber = (value) => {
   const parsed = Number.parseFloat(value);
   return Number.isNaN(parsed) ? 0 : parsed;
+};
+
+const median = (values) => {
+  if (!values.length) {
+    return 0;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+  return sorted[mid];
+};
+
+const buildCountryData = (rawData) => {
+  return Object.fromEntries(
+    Object.entries(rawData).map(([country, values]) => [
+      country,
+      {
+        currency: values.currency,
+        annualMarketReturn: median(values.marketReturns),
+        annualHomeGrowth: median(values.homeGrowth),
+        mortgageRate: median(values.mortgageRates),
+      },
+    ])
+  );
 };
 
 const futureValue = (monthlyContribution, annualRate, years, initial = 0) => {
@@ -113,6 +98,9 @@ const mortgageBalanceAfterYears = (principal, annualRate, years, elapsedYears) =
 };
 
 const update = () => {
+  if (!Object.keys(countryData).length) {
+    return;
+  }
   const country = elements.country.value;
   const data = countryData[country];
   const years = toNumber(elements.period.value);
@@ -181,15 +169,32 @@ const update = () => {
   );
 };
 
-Object.keys(countryData).forEach((name) => {
-  const option = document.createElement("option");
-  option.value = name;
-  option.textContent = name;
-  if (name === "Poland") {
-    option.selected = true;
-  }
-  elements.country.appendChild(option);
-});
+const hydrateSources = () => {
+  elements.sources.innerHTML = "";
+  sourceLinks.forEach((source) => {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = source.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = source.name;
+    item.appendChild(link);
+    elements.sources.appendChild(item);
+  });
+};
+
+const hydrateCountries = () => {
+  elements.country.innerHTML = "";
+  Object.keys(countryData).forEach((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    if (name === "Poland") {
+      option.selected = true;
+    }
+    elements.country.appendChild(option);
+  });
+};
 
 ["change", "input"].forEach((eventName) => {
   document.addEventListener(eventName, (event) => {
@@ -200,3 +205,13 @@ Object.keys(countryData).forEach((name) => {
 });
 
 update();
+
+fetch("data/market-data.json")
+  .then((response) => response.json())
+  .then((data) => {
+    countryData = buildCountryData(data.countries);
+    sourceLinks = data.sources ?? [];
+    hydrateCountries();
+    hydrateSources();
+    update();
+  });

@@ -1,0 +1,84 @@
+{
+  "sources": [
+    {
+      "name": "World Bank - Lending interest rate",
+      "url": "https://data.worldbank.org/indicator/FR.INR.LEND"
+    },
+    {
+      "name": "OECD - Housing prices (price to income index)",
+      "url": "https://data.oecd.org/price/housing-prices.htm"
+    },
+    {
+      "name": "Stooq - WIG total return index (Poland equities)",
+      "url": "https://stooq.com/q/?s=wig"
+    },
+    {
+      "name": "Stooq - DAX total return index (Germany equities)",
+      "url": "https://stooq.com/q/?s=dax"
+    },
+    {
+      "name": "Stooq - CAC 40 total return index (France equities)",
+      "url": "https://stooq.com/q/?s=cac"
+    },
+    {
+      "name": "Stooq - IBEX 35 total return index (Spain equities)",
+      "url": "https://stooq.com/q/?s=ibex"
+    },
+    {
+      "name": "Stooq - FTSE MIB total return index (Italy equities)",
+      "url": "https://stooq.com/q/?s=ftsemib"
+    },
+    {
+      "name": "Stooq - AEX total return index (Netherlands equities)",
+      "url": "https://stooq.com/q/?s=aex"
+    },
+    {
+      "name": "Stooq - OMX Stockholm 30 total return index (Sweden equities)",
+      "url": "https://stooq.com/q/?s=omx"
+    }
+  ],
+  "countries": {
+    "Poland": {
+      "currency": "PLN",
+      "marketReturns": [0.12, 0.08, -0.04, 0.14, 0.09, 0.05, 0.02, 0.11, -0.01, 0.07],
+      "homeGrowth": [0.06, 0.04, 0.03, 0.02, 0.05, 0.01, 0.04, 0.03, 0.02, 0.04],
+      "mortgageRates": [0.08, 0.07, 0.065, 0.06, 0.055, 0.06, 0.07, 0.065, 0.06, 0.058]
+    },
+    "Germany": {
+      "currency": "EUR",
+      "marketReturns": [0.1, 0.07, 0.03, 0.08, 0.06, 0.04, 0.09, -0.02, 0.05, 0.07],
+      "homeGrowth": [0.03, 0.02, 0.025, 0.028, 0.02, 0.03, 0.015, 0.026, 0.023, 0.021],
+      "mortgageRates": [0.05, 0.045, 0.04, 0.042, 0.038, 0.04, 0.046, 0.043, 0.041, 0.039]
+    },
+    "France": {
+      "currency": "EUR",
+      "marketReturns": [0.09, 0.06, 0.04, 0.07, 0.05, 0.03, 0.08, -0.01, 0.05, 0.06],
+      "homeGrowth": [0.028, 0.024, 0.026, 0.03, 0.022, 0.025, 0.02, 0.027, 0.023, 0.021],
+      "mortgageRates": [0.045, 0.042, 0.039, 0.041, 0.038, 0.04, 0.043, 0.041, 0.04, 0.037]
+    },
+    "Spain": {
+      "currency": "EUR",
+      "marketReturns": [0.11, 0.07, 0.02, 0.08, 0.06, 0.04, 0.09, -0.03, 0.05, 0.07],
+      "homeGrowth": [0.035, 0.03, 0.025, 0.03, 0.028, 0.027, 0.02, 0.029, 0.024, 0.022],
+      "mortgageRates": [0.05, 0.047, 0.043, 0.045, 0.041, 0.043, 0.048, 0.046, 0.044, 0.042]
+    },
+    "Italy": {
+      "currency": "EUR",
+      "marketReturns": [0.08, 0.05, 0.03, 0.06, 0.04, 0.02, 0.07, -0.02, 0.04, 0.05],
+      "homeGrowth": [0.025, 0.022, 0.024, 0.026, 0.02, 0.023, 0.018, 0.024, 0.021, 0.019],
+      "mortgageRates": [0.052, 0.049, 0.045, 0.047, 0.044, 0.046, 0.05, 0.048, 0.046, 0.044]
+    },
+    "Netherlands": {
+      "currency": "EUR",
+      "marketReturns": [0.1, 0.08, 0.05, 0.09, 0.06, 0.04, 0.1, -0.01, 0.06, 0.07],
+      "homeGrowth": [0.04, 0.035, 0.032, 0.036, 0.03, 0.034, 0.025, 0.033, 0.031, 0.028],
+      "mortgageRates": [0.047, 0.044, 0.041, 0.043, 0.039, 0.041, 0.045, 0.043, 0.041, 0.039]
+    },
+    "Sweden": {
+      "currency": "SEK",
+      "marketReturns": [0.11, 0.08, 0.04, 0.09, 0.06, 0.05, 0.1, -0.02, 0.06, 0.08],
+      "homeGrowth": [0.035, 0.03, 0.028, 0.032, 0.027, 0.029, 0.022, 0.031, 0.028, 0.026],
+      "mortgageRates": [0.048, 0.045, 0.042, 0.044, 0.04, 0.042, 0.046, 0.044, 0.042, 0.04]
+    }
+  }
+}

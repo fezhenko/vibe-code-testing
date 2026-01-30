@@ -135,6 +135,22 @@ select {
   line-height: 1.4;
 }
 
+.source-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.source-list a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.source-list a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 640px) {
   body {
     padding: 20px 16px 60px;
