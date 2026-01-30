@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investment Median Planner</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <p class="eyebrow">Minimal investment planner</p>
+        <h1>Median-based investment outlook</h1>
+        <p class="subtitle">
+          Estimate long-term value using median historical returns for European markets. Designed with Poland first, with
+          support for other countries.
+        </p>
+      </header>
+
+      <section class="panel">
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country"></select>
+          <p class="helper">Rates auto-update to the country median assumptions.</p>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="period">Period</label>
+            <select id="period">
+              <option value="5">5 years</option>
+              <option value="10">10 years</option>
+              <option value="15">15 years</option>
+              <option value="20">20 years</option>
+              <option value="25">20+ years (25)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="monthly">Monthly investment</label>
+            <input id="monthly" type="number" min="0" step="50" value="1000" />
+          </div>
+          <div class="field">
+            <label for="initial">Initial lump sum</label>
+            <input id="initial" type="number" min="0" step="500" value="10000" />
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Results</h2>
+        <div class="results">
+          <div class="result-card">
+            <h3>Invest-only outlook</h3>
+            <p class="result-value" id="invest-only">€0</p>
+            <p class="muted">Estimated portfolio value using median annual market returns.</p>
+          </div>
+          <div class="result-card">
+            <h3>Rent &amp; invest</h3>
+            <p class="result-value" id="rent-invest">€0</p>
+            <p class="muted">Same investment plan while renting a flat.</p>
+          </div>
+          <div class="result-card">
+            <h3>Mortgage &amp; invest</h3>
+            <p class="result-value" id="mortgage-invest">€0</p>
+            <p class="muted">
+              Includes home equity growth and reduces investments if the mortgage costs more than rent.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel housing">
+        <h2>Housing assumptions</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="rent">Monthly rent</label>
+            <input id="rent" type="number" min="0" step="50" value="900" />
+          </div>
+          <div class="field">
+            <label for="home-price">Home price</label>
+            <input id="home-price" type="number" min="0" step="5000" value="200000" />
+          </div>
+          <div class="field">
+            <label for="down-payment">Down payment (%)</label>
+            <input id="down-payment" type="number" min="0" max="100" step="1" value="20" />
+          </div>
+          <div class="field">
+            <label for="mortgage-years">Mortgage term (years)</label>
+            <input id="mortgage-years" type="number" min="5" max="40" step="1" value="25" />
+          </div>
+        </div>
+        <div class="assumptions">
+          <div>
+            <p class="label">Median market return</p>
+            <p id="market-return">—</p>
+          </div>
+          <div>
+            <p class="label">Median home price growth</p>
+            <p id="home-growth">—</p>
+          </div>
+          <div>
+            <p class="label">Median mortgage rate</p>
+            <p id="mortgage-rate">—</p>
+          </div>
+          <div>
+            <p class="label">Estimated mortgage payment</p>
+            <p id="mortgage-payment">—</p>
+          </div>
+        </div>
+        <p class="disclaimer">
+          The calculator uses simplified median assumptions for guidance only. Always confirm with real market data and
+          professional advice.
+        </p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
