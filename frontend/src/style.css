@@ -6,6 +6,7 @@
   --muted: #6a6e7b;
   --accent: #3d6df2;
   --border: #e0e3ed;
+  --error: #b3261e;
 }
 
 * {
@@ -54,6 +55,11 @@ body {
   box-shadow: 0 12px 24px rgba(27, 29, 40, 0.04);
   display: grid;
   gap: 20px;
+}
+
+.panel.error {
+  border-color: rgba(179, 38, 30, 0.4);
+  color: var(--error);
 }
 
 .grid {
