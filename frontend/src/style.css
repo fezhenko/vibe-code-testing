@@ -183,9 +183,19 @@ select {
   height: 100%;
 }
 
-.bar {
+.bar-stack {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
   width: 100%;
-  border-radius: 10px 10px 4px 4px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(61, 109, 242, 0.08);
+}
+
+.bar-segment {
+  width: 100%;
   transition: height 0.3s ease;
 }
 
