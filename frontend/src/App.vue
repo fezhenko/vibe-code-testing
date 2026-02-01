@@ -67,6 +67,70 @@
       </div>
     </section>
 
+    <section class="panel projection">
+      <div class="projection-header">
+        <div>
+          <h2>Investment growth detail</h2>
+          <p class="muted">
+            The schedule mirrors the Google Sheets formulas you shared, using monthly contributions and median market
+            returns. "Own money share" shows how much of the portfolio comes from your contributions.
+          </p>
+        </div>
+        <div class="legend">
+          <span class="legend-item">
+            <span class="legend-swatch legend-total"></span>
+            Total invested
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch legend-portfolio"></span>
+            Portfolio value
+          </span>
+        </div>
+      </div>
+
+      <div class="bar-chart" aria-hidden="true">
+        <div
+          v-for="row in investmentSchedule"
+          :key="row.year"
+          class="bar-group"
+          :style="{ '--group-height': `${row.portfolioHeight}%` }"
+        >
+          <div
+            class="bar bar-total"
+            :style="{ height: `${row.totalHeight}%` }"
+          ></div>
+          <div
+            class="bar bar-portfolio"
+            :style="{ height: `${row.portfolioHeight}%` }"
+          ></div>
+          <span class="bar-label">{{ row.year }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Year</th>
+              <th scope="col">Total invested</th>
+              <th scope="col">Portfolio value</th>
+              <th scope="col">Own money share</th>
+              <th scope="col">Monthly income</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in investmentSchedule" :key="row.year">
+              <th scope="row">{{ row.year }}</th>
+              <td>{{ formatCurrency(row.totalInvested) }}</td>
+              <td>{{ formatCurrency(row.portfolioValue) }}</td>
+              <td>{{ formatPercent(row.ownMoneyShare) }}</td>
+              <td>{{ formatCurrency(row.monthlyIncome) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="panel housing">
       <h2>Housing assumptions</h2>
       <div class="grid">
@@ -195,17 +259,18 @@ const futureValue = (
   monthlyContribution: number,
   annualRate: number,
   totalYears: number,
-  initial = 0
+  initial = 0,
+  payAtStart = false
 ) => {
   const months = totalYears * 12;
   const monthlyRate = annualRate / 12;
   if (monthlyRate === 0) {
     return initial + monthlyContribution * months;
   }
-  return (
-    initial * Math.pow(1 + monthlyRate, months) +
-    monthlyContribution * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate)
-  );
+  const growth = Math.pow(1 + monthlyRate, months);
+  const annuityFactor = (growth - 1) / monthlyRate;
+  const paymentFactor = payAtStart ? annuityFactor * (1 + monthlyRate) : annuityFactor;
+  return initial * growth + monthlyContribution * paymentFactor;
 };
 
 const mortgageMonthlyPayment = (principal: number, annualRate: number, termYears: number) => {
@@ -330,5 +395,52 @@ onMounted(async () => {
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Unexpected error loading data.";
   }
+});
+
+const investmentSchedule = computed(() => {
+  const data = assumptionsForCountry.value;
+  if (!data) {
+    return [] as Array<{
+      year: number;
+      totalInvested: number;
+      portfolioValue: number;
+      ownMoneyShare: number;
+      monthlyIncome: number;
+      totalHeight: number;
+      portfolioHeight: number;
+    }>;
+  }
+
+  const monthlyInv = toNum(monthlyInvestment.value);
+  const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
+  const annualRate = data.annualMarketReturn;
+
+  const rows = Array.from({ length: horizonYears }, (_, index) => {
+    const year = index + 1;
+    const totalInvested = monthlyInv * 12 * year;
+    const portfolioValue = futureValue(monthlyInv, annualRate, year, 0, true);
+    const ownMoneyShare = portfolioValue > 0 ? totalInvested / portfolioValue : 0;
+    const monthlyIncome = portfolioValue * (annualRate / 12);
+
+    return {
+      year,
+      totalInvested,
+      portfolioValue,
+      ownMoneyShare,
+      monthlyIncome,
+      totalHeight: 0,
+      portfolioHeight: 0,
+    };
+  });
+
+  const maxValue = rows.reduce(
+    (acc, row) => Math.max(acc, row.totalInvested, row.portfolioValue),
+    0
+  );
+  return rows.map((row) => ({
+    ...row,
+    totalHeight: maxValue > 0 ? (row.totalInvested / maxValue) * 100 : 0,
+    portfolioHeight: maxValue > 0 ? (row.portfolioValue / maxValue) * 100 : 0,
+  }));
 });
 </script>
