@@ -52,7 +52,7 @@
         <div class="result-card">
           <h3>Rent &amp; invest</h3>
           <p class="result-value">{{ formatCurrency(results.rentInvest) }}</p>
-          <p class="muted">Same investment plan while renting a flat.</p>
+          <p class="muted">Invests what remains after monthly rent is paid.</p>
         </div>
         <div class="result-card">
           <h3>Mortgage &amp; invest</h3>
@@ -242,6 +242,13 @@ const results = computed(() => {
     years.value,
     initialInvestment.value
   );
+  const rentAdjustedInvestment = Math.max(monthlyInvestment.value - monthlyRent.value, 0);
+  const rentValue = futureValue(
+    rentAdjustedInvestment,
+    data.annualMarketReturn,
+    years.value,
+    initialInvestment.value
+  );
 
   const downPayment = homePrice.value * (downPaymentPercent.value / 100);
   const mortgagePrincipal = Math.max(homePrice.value - downPayment, 0);
@@ -271,7 +278,7 @@ const results = computed(() => {
 
   return {
     investOnly: investValue,
-    rentInvest: investValue,
+    rentInvest: rentValue,
     mortgageInvest: mortgageInvestmentValue + homeEquity,
     mortgagePayment,
   };
