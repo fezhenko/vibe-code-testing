@@ -30,3 +30,4 @@ dist/
 # Gradle
 .gradle/
 build/
+/frontend/package-lock.json

@@ -34,102 +34,13 @@
         <div class="field">
           <label for="monthly">Monthly cash available</label>
           <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-          <p class="helper">Monthly amount before housing costs (rent or mortgage).</p>
+          <p class="helper" hidden>Monthly amount before housing costs (rent or mortgage).</p>
         </div>
         <div class="field">
           <label for="initial">Initial lump sum</label>
           <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
           <p class="helper helper-spacer">Spacer</p>
         </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Results</h2>
-      <div class="results">
-        <div class="result-card">
-          <h3>Invest-only outlook</h3>
-          <p class="result-value">{{ formatCurrency(results.investOnly) }}</p>
-          <p class="muted">Estimated portfolio value using median annual market returns.</p>
-        </div>
-        <div class="result-card">
-          <h3>Rent &amp; invest</h3>
-          <p class="result-value">{{ formatCurrency(results.rentInvest) }}</p>
-          <p class="muted">Portfolio value when you invest the monthly amount each month, plus initial lump sum.</p>
-        </div>
-        <div class="result-card">
-          <h3>Mortgage &amp; invest</h3>
-          <p class="result-value">{{ formatCurrency(results.mortgageInvest) }}</p>
-          <p class="muted">
-            Includes home equity growth, invests what remains after the mortgage payment, and subtracts paid interest.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel projection">
-      <div class="projection-header">
-        <div>
-          <h2>Investment growth detail</h2>
-          <p class="muted">
-            The schedule mirrors the Google Sheets formulas you shared, using monthly contributions after rent and median
-            market returns. Total invested includes your contributions plus any initial lump sum, while portfolio value
-            adds market growth on top. "Own money share" shows how much of the portfolio comes from your contributions.
-          </p>
-        </div>
-        <div class="legend">
-          <span class="legend-item">
-            <span class="legend-swatch legend-total"></span>
-            Total invested (after housing)
-          </span>
-          <span class="legend-item">
-            <span class="legend-swatch legend-portfolio"></span>
-            Market growth
-          </span>
-        </div>
-      </div>
-
-      <div class="bar-chart" aria-hidden="true">
-        <div
-          v-for="row in investmentSchedule"
-          :key="row.year"
-          class="bar-group"
-        >
-          <div class="bar-stack">
-            <div
-              class="bar-segment bar-total"
-              :style="{ height: `${row.investedHeight}%` }"
-            ></div>
-            <div
-              class="bar-segment bar-portfolio"
-              :style="{ height: `${row.growthHeight}%` }"
-            ></div>
-          </div>
-          <span class="bar-label">{{ row.year }}</span>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Year</th>
-              <th scope="col">Total invested</th>
-              <th scope="col">Portfolio value</th>
-              <th scope="col">Own money share</th>
-              <th scope="col">Monthly income</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in investmentSchedule" :key="row.year">
-              <th scope="row">{{ row.year }}</th>
-              <td>{{ formatCurrency(row.totalInvested) }}</td>
-              <td>{{ formatCurrency(row.portfolioValue) }}</td>
-              <td>{{ formatPercent(row.ownMoneyShare) }}</td>
-              <td>{{ formatCurrency(row.monthlyIncome) }}</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </section>
 
@@ -175,6 +86,116 @@
         The calculator uses median assumptions derived from open-source datasets for guidance only. Always confirm with
         real market data and professional advice.
       </p>
+    </section>
+
+    <section class="panel">
+      <h2>Results</h2>
+      <div class="results">
+        <div class="result-card">
+          <h3>Invest-only outlook</h3>
+          <p class="result-value">{{ formatCurrency(results.investOnly) }}</p>
+          <p class="muted">Estimated portfolio value using median annual market returns.</p>
+        </div>
+        <div class="result-card">
+          <h3>Rent &amp; invest</h3>
+          <p class="result-value">{{ formatCurrency(results.rentInvest) }}</p>
+          <p class="muted">Portfolio value when you invest the monthly amount each month, plus initial lump sum.</p>
+        </div>
+        <div class="result-card">
+          <h3>Mortgage &amp; invest</h3>
+          <p v-if="results.mortgageInvest < 0" class="result-value" style="color: var(--error); font-size: 1rem;">
+            Insufficient initial capital
+          </p>
+          <p v-else class="result-value">{{ formatCurrency(results.mortgageInvest) }}</p>
+          <p class="muted">
+            Includes home equity, subtracts mortgage &amp; est. 1% maintenance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel projection">
+      <div class="projection-header">
+        <div>
+          <h2>Net Worth Comparison</h2>
+          <p class="muted">
+            Projected total value (Assets - Debts) for both strategies over time.
+          </p>
+        </div>
+        <div class="legend">
+      <span class="legend-item">
+        <span class="legend-swatch" style="background: var(--accent)"></span>
+        Rent Strategy
+      </span>
+          <span class="legend-item">
+        <span class="legend-swatch" style="background: #f28c3d"></span>
+        Buy Strategy
+      </span>
+        </div>
+      </div>
+
+      <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
+        <div
+            v-for="row in investmentSchedule"
+            :key="row.year"
+            class="bar-group"
+        >
+          <div
+              class="bar bar-rent"
+              :style="{ height: `${row.rentHeight}%` }"
+              title="Rent Strategy"
+          ></div>
+
+          <div class="bar-stack" style="width: 12px; display: flex; flex-direction: column-reverse; height: 100%;">
+
+            <div
+                class="bar"
+                style="background: #f28c3d; width: 100%; border-radius: 2px 2px 4px 4px;"
+                :style="{ height: `${(row.buyHomeEquity / row.maxValue) * 100}%` }"
+                title="Home Equity"
+            ></div>
+
+            <div
+                class="bar"
+                style="background: #4caf50; width: 100%; border-radius: 4px 4px 2px 2px;"
+                :style="{ height: `${(row.buyStockPortfolio / row.maxValue) * 100}%` }"
+                title="Liquid Stocks"
+            ></div>
+          </div>
+
+          <span class="bar-label" v-if="row.year % 5 === 0">{{ row.year }}</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Rent Net Worth</th>
+            <th scope="col">Buy Net Worth</th>
+            <th scope="col">Difference</th>
+            <th scope="col" class="muted">Liquid Assets (Buy)</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="row in investmentSchedule" :key="row.year">
+            <th scope="row">{{ row.year }}</th>
+
+            <td>{{ formatCurrency(row.rentPortfolio) }}</td>
+
+            <td>{{ formatCurrency(row.buyNetWorth) }}</td>
+
+            <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
+              {{ row.buyNetWorth >= row.rentPortfolio ? '+' : '' }}
+              {{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
+            </td>
+
+            <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
 
     <section class="panel sources">
@@ -321,64 +342,95 @@ const results = computed(() => {
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
   const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
 
-  const investValue = futureValue(
-    monthlyInv,
-    data.annualMarketReturn,
-    horizonYears,
-    initialInv
-  );
-
+  // --- 1. RENT & INVEST SCENARIO ---
   const rentInvestment = Math.max(monthlyInv - rentCost, 0);
   const rentValue = futureValue(
-    rentInvestment,
-    data.annualMarketReturn,
-    horizonYears,
-    initialInv
+      rentInvestment,
+      data.annualMarketReturn,
+      horizonYears,
+      initialInv
   );
 
+  // --- 2. INVEST ONLY (No housing costs logic) ---
+  const investValue = futureValue(
+      monthlyInv,
+      data.annualMarketReturn,
+      horizonYears,
+      initialInv
+  );
+
+  // --- 3. MORTGAGE & INVEST SCENARIO ---
   const downPayment = homePriceVal * (downPct / 100);
+
+  // If you don't have enough cash for the down payment, the comparison is invalid.
+  // We return 0 (or a very low number) to indicate this path is impossible.
+  if (downPayment > initialInv) {
+    return {
+      investOnly: investValue,
+      rentInvest: rentValue,
+      mortgageInvest: -1,
+      mortgagePayment: 0
+    };
+  }
+
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
   const mortgagePayment = mortgageMonthlyPayment(
-    mortgagePrincipal,
-    data.mortgageRate,
-    termYears
+      mortgagePrincipal,
+      data.mortgageRate,
+      termYears
   );
+
+  // Rule of thumb: 1% of home value annually for maintenance/insurance
+  const monthlyMaintenance = (homePriceVal * 0.01) / 12;
+
+  // Investable cash is Income - Mortgage - Maintenance
+  const totalHousingCost = mortgagePayment + monthlyMaintenance;
+
+  // If mortgage + maintenance > income, you are losing money every month.
+  // We treat this as negative investment (debt) or zero.
+  // For simplicity here, we floor at 0, but strictly this is an impossible scenario too.
+  const investmentAfterHousing = Math.max(monthlyInv - totalHousingCost, 0);
+
   const mortgageInitialInvestment = Math.max(initialInv - downPayment, 0);
-  const investmentAfterMortgage = Math.max(monthlyInv - mortgagePayment, 0);
+
   const mortgageYearsPaid = Math.min(horizonYears, termYears);
   const remainingYears = Math.max(horizonYears - termYears, 0);
+
+  // Phase 1: During Mortgage
   const investmentDuringMortgage = futureValue(
-    investmentAfterMortgage,
-    data.annualMarketReturn,
-    mortgageYearsPaid,
-    mortgageInitialInvestment
+      investmentAfterHousing,
+      data.annualMarketReturn,
+      mortgageYearsPaid,
+      mortgageInitialInvestment
   );
+
+  // Phase 2: After Mortgage (Mortgage payment drops to 0, but Maintenance remains)
+  // Income - Maintenance (No mortgage)
+  const monthlyInvPostMortgage = Math.max(monthlyInv - monthlyMaintenance, 0);
+
   const mortgageInvestmentValue =
-    remainingYears > 0
-      ? futureValue(
-          monthlyInv,
-          data.annualMarketReturn,
-          remainingYears,
-          investmentDuringMortgage
-        )
-      : investmentDuringMortgage;
+      remainingYears > 0
+          ? futureValue(
+              monthlyInvPostMortgage,
+              data.annualMarketReturn,
+              remainingYears,
+              investmentDuringMortgage
+          )
+          : investmentDuringMortgage;
+
   const remainingBalance = mortgageBalanceAfterYears(
-    mortgagePrincipal,
-    data.mortgageRate,
-    termYears,
-    horizonYears
+      mortgagePrincipal,
+      data.mortgageRate,
+      termYears,
+      horizonYears
   );
   const futureHomeValue = homePriceVal * Math.pow(1 + data.annualHomeGrowth, horizonYears);
   const homeEquity = Math.max(futureHomeValue - remainingBalance, 0);
-  const mortgageMonthsPaid = Math.min(horizonYears, termYears) * 12;
-  const totalPayments = mortgagePayment * mortgageMonthsPaid;
-  const principalPaid = mortgagePrincipal - remainingBalance;
-  const interestPaid = Math.max(totalPayments - principalPaid, 0);
 
   return {
     investOnly: investValue,
     rentInvest: rentValue,
-    mortgageInvest: mortgageInvestmentValue + homeEquity - interestPaid,
+    mortgageInvest: mortgageInvestmentValue + homeEquity,
     mortgagePayment,
   };
 });
@@ -401,52 +453,80 @@ onMounted(async () => {
 
 const investmentSchedule = computed(() => {
   const data = assumptionsForCountry.value;
-  if (!data) {
-    return [] as Array<{
-      year: number;
-      totalInvested: number;
-      portfolioValue: number;
-      ownMoneyShare: number;
-      monthlyIncome: number;
-      investedHeight: number;
-      growthHeight: number;
-    }>;
-  }
+  if (!data) return [];
 
   const monthlyInv = toNum(monthlyInvestment.value);
   const initialInv = toNum(initialInvestment.value);
-  const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
   const rentCost = toNum(monthlyRent.value);
   const annualRate = data.annualMarketReturn;
-  const netMonthlyInvestment = Math.max(monthlyInv - rentCost, 0);
+  const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
+
+  // Buy Scenario Inputs
+  const homePriceVal = toNum(homePrice.value);
+  const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
+  const downPayment = homePriceVal * (downPct / 100);
+  const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
+  const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
+  const mortgagePayment = mortgageMonthlyPayment(mortgagePrincipal, data.mortgageRate, termYears);
+  const monthlyMaintenance = (homePriceVal * 0.01) / 12;
+
+  // Rent Inputs
+  const rentMonthlyInvest = Math.max(monthlyInv - rentCost, 0);
+
+  // Buy Inputs
+  const buyInitialStockInvest = Math.max(initialInv - downPayment, 0);
+  const buyMonthlyStockInvest = Math.max(monthlyInv - (mortgagePayment + monthlyMaintenance), 0);
 
   const rows = Array.from({ length: horizonYears }, (_, index) => {
     const year = index + 1;
-    const totalInvested = initialInv + netMonthlyInvestment * 12 * year;
-    const portfolioValue = futureValue(netMonthlyInvestment, annualRate, year, initialInv);
-    const ownMoneyShare = portfolioValue > 0 ? totalInvested / portfolioValue : 0;
-    const monthlyIncome = portfolioValue * (annualRate / 12);
+
+    // 1. Rent Calculation
+    const rentPortfolio = futureValue(rentMonthlyInvest, annualRate, year, initialInv, true);
+
+    // 2. Buy Calculation
+    const mortgageActiveYears = Math.min(year, termYears);
+    const mortgageFreeYears = Math.max(year - termYears, 0);
+
+    let buyStockPortfolio = futureValue(
+        buyMonthlyStockInvest,
+        annualRate,
+        mortgageActiveYears,
+        buyInitialStockInvest,
+        true
+    );
+
+    if (mortgageFreeYears > 0) {
+      const postMortgageMonthly = Math.max(monthlyInv - monthlyMaintenance, 0);
+      buyStockPortfolio = futureValue(
+          postMortgageMonthly,
+          annualRate,
+          mortgageFreeYears,
+          buyStockPortfolio,
+          true
+      );
+    }
+
+    const balance = mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year);
+    const homeVal = homePriceVal * Math.pow(1 + data.annualHomeGrowth, year);
+    const homeEquity = Math.max(homeVal - balance, 0);
+    const buyNetWorth = buyStockPortfolio + homeEquity;
 
     return {
       year,
-      totalInvested,
-      portfolioValue,
-      ownMoneyShare,
-      monthlyIncome,
-      investedHeight: 0,
-      growthHeight: 0,
+      rentPortfolio,
+      buyNetWorth,
+      buyStockPortfolio,
+      buyHomeEquity: homeEquity, // <--- THIS WAS MISSING
+      maxValue: Math.max(rentPortfolio, buyNetWorth)
     };
   });
 
-  const maxValue = rows.reduce((acc, row) => Math.max(acc, row.portfolioValue), 0);
-  return rows.map((row) => {
-    const cappedInvested = Math.min(row.totalInvested, row.portfolioValue);
-    const growth = Math.max(row.portfolioValue - row.totalInvested, 0);
-    return {
-      ...row,
-      investedHeight: maxValue > 0 ? (cappedInvested / maxValue) * 100 : 0,
-      growthHeight: maxValue > 0 ? (growth / maxValue) * 100 : 0,
-    };
-  });
+  const globalMax = rows.reduce((acc, row) => Math.max(acc, row.maxValue), 0);
+
+  return rows.map(row => ({
+    ...row,
+    rentHeight: globalMax > 0 ? (row.rentPortfolio / globalMax) * 100 : 0,
+    buyHeight: globalMax > 0 ? (row.buyNetWorth / globalMax) * 100 : 0
+  }));
 });
 </script>
