@@ -136,34 +136,32 @@
 
       <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
         <div
-            v-for="row in investmentSchedule"
-            :key="row.year"
-            class="bar-group"
+          v-for="row in investmentSchedule"
+          :key="row.year"
+          class="bar-group"
+          :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
         >
           <div
-              class="bar bar-rent"
-              :style="{ height: `${row.rentHeight}%` }"
-              title="Rent Strategy"
+            class="bar bar-rent"
+            :style="{ height: `${row.rentHeight}%` }"
           ></div>
 
-          <div class="bar-stack" style="width: 12px; display: flex; flex-direction: column-reverse; height: 100%;">
-
-            <div
-                class="bar"
-                style="background: #f28c3d; width: 100%; border-radius: 2px 2px 4px 4px;"
-                :style="{ height: `${(row.buyHomeEquity / row.maxValue) * 100}%` }"
-                title="Home Equity"
-            ></div>
-
-            <div
-                class="bar"
-                style="background: #4caf50; width: 100%; border-radius: 4px 4px 2px 2px;"
-                :style="{ height: `${(row.buyStockPortfolio / row.maxValue) * 100}%` }"
-                title="Liquid Stocks"
-            ></div>
+          <div
+            v-if="row.canAffordBuy"
+            class="bar-stack"
+            :style="{ height: `${row.buyTotalHeight}%` }"
+          >
+            <div class="bar bar-liquid" :style="{ flex: row.liquidFlex }"></div>
+            <div class="bar bar-equity" :style="{ flex: row.equityFlex }"></div>
           </div>
 
-          <span class="bar-label" v-if="row.year % 5 === 0">{{ row.year }}</span>
+          <div
+            v-else
+            class="bar"
+            style="background: transparent; border: 1px dashed var(--error); height: 5px; width: 12px;"
+          ></div>
+
+          <span class="bar-label" v-if="row.year % 5 === 0 || row.year === 1">{{ row.year }}</span>
         </div>
       </div>
 
@@ -457,76 +455,72 @@ const investmentSchedule = computed(() => {
 
   const monthlyInv = toNum(monthlyInvestment.value);
   const initialInv = toNum(initialInvestment.value);
-  const rentCost = toNum(monthlyRent.value);
+  const rentCostStart = toNum(monthlyRent.value);
   const annualRate = data.annualMarketReturn;
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
 
-  // Buy Scenario Inputs
+  // Buy Inputs
   const homePriceVal = toNum(homePrice.value);
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
   const downPayment = homePriceVal * (downPct / 100);
+  const closingCosts = homePriceVal * 0.03;
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
   const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
   const mortgagePayment = mortgageMonthlyPayment(mortgagePrincipal, data.mortgageRate, termYears);
   const monthlyMaintenance = (homePriceVal * 0.01) / 12;
 
-  // Rent Inputs
-  const rentMonthlyInvest = Math.max(monthlyInv - rentCost, 0);
+  const totalUpfrontCost = downPayment + closingCosts;
+  const canAffordBuy = initialInv >= totalUpfrontCost;
 
-  // Buy Inputs
-  const buyInitialStockInvest = Math.max(initialInv - downPayment, 0);
-  const buyMonthlyStockInvest = Math.max(monthlyInv - (mortgagePayment + monthlyMaintenance), 0);
+  const buyInitialStockInvest = canAffordBuy ? initialInv - totalUpfrontCost : 0;
 
-  const rows = Array.from({ length: horizonYears }, (_, index) => {
-    const year = index + 1;
+  let rentPortfolio = initialInv;
+  let buyStockPortfolio = buyInitialStockInvest;
+  let rentCurrentCost = rentCostStart;
+  const rentInflation = 0.03;
 
-    // 1. Rent Calculation
-    const rentPortfolio = futureValue(rentMonthlyInvest, annualRate, year, initialInv, true);
+  const rows = [];
 
-    // 2. Buy Calculation
-    const mortgageActiveYears = Math.min(year, termYears);
-    const mortgageFreeYears = Math.max(year - termYears, 0);
+  for (let year = 1; year <= horizonYears; year++) {
+    const rentMonthlyInvest = Math.max(monthlyInv - rentCurrentCost, 0);
+    rentPortfolio = futureValue(rentMonthlyInvest, annualRate, 1, rentPortfolio, true);
+    rentCurrentCost *= 1 + rentInflation;
 
-    let buyStockPortfolio = futureValue(
-        buyMonthlyStockInvest,
-        annualRate,
-        mortgageActiveYears,
-        buyInitialStockInvest,
-        true
-    );
+    if (canAffordBuy) {
+      const isMortgageActive = year <= termYears;
+      const currentHousingCost = isMortgageActive
+        ? mortgagePayment + monthlyMaintenance
+        : monthlyMaintenance;
 
-    if (mortgageFreeYears > 0) {
-      const postMortgageMonthly = Math.max(monthlyInv - monthlyMaintenance, 0);
-      buyStockPortfolio = futureValue(
-          postMortgageMonthly,
-          annualRate,
-          mortgageFreeYears,
-          buyStockPortfolio,
-          true
-      );
+      const buyMonthlyInvest = Math.max(monthlyInv - currentHousingCost, 0);
+      buyStockPortfolio = futureValue(buyMonthlyInvest, annualRate, 1, buyStockPortfolio, true);
     }
 
-    const balance = mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year);
+    const balance = canAffordBuy
+      ? mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year)
+      : 0;
     const homeVal = homePriceVal * Math.pow(1 + data.annualHomeGrowth, year);
-    const homeEquity = Math.max(homeVal - balance, 0);
-    const buyNetWorth = buyStockPortfolio + homeEquity;
+    const homeEquity = canAffordBuy ? Math.max(homeVal - balance, 0) : 0;
+    const buyNetWorth = canAffordBuy ? buyStockPortfolio + homeEquity : 0;
 
-    return {
+    rows.push({
       year,
       rentPortfolio,
       buyNetWorth,
       buyStockPortfolio,
-      buyHomeEquity: homeEquity, // <--- THIS WAS MISSING
-      maxValue: Math.max(rentPortfolio, buyNetWorth)
-    };
-  });
+      buyHomeEquity: homeEquity,
+      canAffordBuy,
+    });
+  }
 
-  const globalMax = rows.reduce((acc, row) => Math.max(acc, row.maxValue), 0);
+  const globalMax = rows.reduce((acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth), 0);
 
   return rows.map(row => ({
     ...row,
     rentHeight: globalMax > 0 ? (row.rentPortfolio / globalMax) * 100 : 0,
-    buyHeight: globalMax > 0 ? (row.buyNetWorth / globalMax) * 100 : 0
+    buyTotalHeight: globalMax > 0 ? (row.buyNetWorth / globalMax) * 100 : 0,
+    liquidFlex: row.buyStockPortfolio,
+    equityFlex: row.buyHomeEquity,
   }));
 });
 </script>
