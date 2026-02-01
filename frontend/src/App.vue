@@ -73,17 +73,18 @@
           <h2>Investment growth detail</h2>
           <p class="muted">
             The schedule mirrors the Google Sheets formulas you shared, using monthly contributions after rent and median
-            market returns. "Own money share" shows how much of the portfolio comes from your contributions.
+            market returns. Total invested includes your contributions plus any initial lump sum, while portfolio value
+            adds market growth on top. "Own money share" shows how much of the portfolio comes from your contributions.
           </p>
         </div>
         <div class="legend">
           <span class="legend-item">
             <span class="legend-swatch legend-total"></span>
-            Total invested
+            Total invested (after housing)
           </span>
           <span class="legend-item">
             <span class="legend-swatch legend-portfolio"></span>
-            Portfolio value
+            Market growth
           </span>
         </div>
       </div>
@@ -93,16 +94,17 @@
           v-for="row in investmentSchedule"
           :key="row.year"
           class="bar-group"
-          :style="{ '--group-height': `${row.portfolioHeight}%` }"
         >
-          <div
-            class="bar bar-total"
-            :style="{ height: `${row.totalHeight}%` }"
-          ></div>
-          <div
-            class="bar bar-portfolio"
-            :style="{ height: `${row.portfolioHeight}%` }"
-          ></div>
+          <div class="bar-stack">
+            <div
+              class="bar-segment bar-total"
+              :style="{ height: `${row.investedHeight}%` }"
+            ></div>
+            <div
+              class="bar-segment bar-portfolio"
+              :style="{ height: `${row.growthHeight}%` }"
+            ></div>
+          </div>
           <span class="bar-label">{{ row.year }}</span>
         </div>
       </div>
@@ -406,8 +408,8 @@ const investmentSchedule = computed(() => {
       portfolioValue: number;
       ownMoneyShare: number;
       monthlyIncome: number;
-      totalHeight: number;
-      portfolioHeight: number;
+      investedHeight: number;
+      growthHeight: number;
     }>;
   }
 
@@ -421,13 +423,7 @@ const investmentSchedule = computed(() => {
   const rows = Array.from({ length: horizonYears }, (_, index) => {
     const year = index + 1;
     const totalInvested = initialInv + netMonthlyInvestment * 12 * year;
-    const portfolioValue = futureValue(
-      netMonthlyInvestment,
-      annualRate,
-      year,
-      initialInv,
-      true
-    );
+    const portfolioValue = futureValue(netMonthlyInvestment, annualRate, year, initialInv);
     const ownMoneyShare = portfolioValue > 0 ? totalInvested / portfolioValue : 0;
     const monthlyIncome = portfolioValue * (annualRate / 12);
 
@@ -437,19 +433,20 @@ const investmentSchedule = computed(() => {
       portfolioValue,
       ownMoneyShare,
       monthlyIncome,
-      totalHeight: 0,
-      portfolioHeight: 0,
+      investedHeight: 0,
+      growthHeight: 0,
     };
   });
 
-  const maxValue = rows.reduce(
-    (acc, row) => Math.max(acc, row.totalInvested, row.portfolioValue),
-    0
-  );
-  return rows.map((row) => ({
-    ...row,
-    totalHeight: maxValue > 0 ? (row.totalInvested / maxValue) * 100 : 0,
-    portfolioHeight: maxValue > 0 ? (row.portfolioValue / maxValue) * 100 : 0,
-  }));
+  const maxValue = rows.reduce((acc, row) => Math.max(acc, row.portfolioValue), 0);
+  return rows.map((row) => {
+    const cappedInvested = Math.min(row.totalInvested, row.portfolioValue);
+    const growth = Math.max(row.portfolioValue - row.totalInvested, 0);
+    return {
+      ...row,
+      investedHeight: maxValue > 0 ? (cappedInvested / maxValue) * 100 : 0,
+      growthHeight: maxValue > 0 ? (growth / maxValue) * 100 : 0,
+    };
+  });
 });
 </script>
