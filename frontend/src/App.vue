@@ -72,8 +72,8 @@
         <div>
           <h2>Investment growth detail</h2>
           <p class="muted">
-            The schedule mirrors the Google Sheets formulas you shared, using monthly contributions and median market
-            returns. "Own money share" shows how much of the portfolio comes from your contributions.
+            The schedule mirrors the Google Sheets formulas you shared, using monthly contributions after rent and median
+            market returns. "Own money share" shows how much of the portfolio comes from your contributions.
           </p>
         </div>
         <div class="legend">
@@ -412,13 +412,22 @@ const investmentSchedule = computed(() => {
   }
 
   const monthlyInv = toNum(monthlyInvestment.value);
+  const initialInv = toNum(initialInvestment.value);
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
+  const rentCost = toNum(monthlyRent.value);
   const annualRate = data.annualMarketReturn;
+  const netMonthlyInvestment = Math.max(monthlyInv - rentCost, 0);
 
   const rows = Array.from({ length: horizonYears }, (_, index) => {
     const year = index + 1;
-    const totalInvested = monthlyInv * 12 * year;
-    const portfolioValue = futureValue(monthlyInv, annualRate, year, 0, true);
+    const totalInvested = initialInv + netMonthlyInvestment * 12 * year;
+    const portfolioValue = futureValue(
+      netMonthlyInvestment,
+      annualRate,
+      year,
+      initialInv,
+      true
+    );
     const ownMoneyShare = portfolioValue > 0 ? totalInvested / portfolioValue : 0;
     const monthlyIncome = portfolioValue * (annualRate / 12);
 
