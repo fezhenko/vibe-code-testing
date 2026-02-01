@@ -58,7 +58,7 @@
           <h3>Mortgage &amp; invest</h3>
           <p class="result-value">{{ formatCurrency(results.mortgageInvest) }}</p>
           <p class="muted">
-            Includes home equity growth and reduces investments if the mortgage costs more than rent.
+            Includes home equity growth and invests what remains after the mortgage payment.
           </p>
         </div>
       </div>
@@ -257,15 +257,13 @@ const results = computed(() => {
     data.mortgageRate,
     mortgageYears.value
   );
-  const investmentAfterMortgage = Math.max(
-    monthlyInvestment.value - Math.max(mortgagePayment - monthlyRent.value, 0),
-    0
-  );
+  const mortgageInitialInvestment = Math.max(initialInvestment.value - downPayment, 0);
+  const investmentAfterMortgage = Math.max(monthlyInvestment.value - mortgagePayment, 0);
   const mortgageInvestmentValue = futureValue(
     investmentAfterMortgage,
     data.annualMarketReturn,
     years.value,
-    initialInvestment.value
+    mortgageInitialInvestment
   );
   const remainingBalance = mortgageBalanceAfterYears(
     mortgagePrincipal,
