@@ -163,17 +163,17 @@ select {
   background: #f28c3d;
 }
 
+/* --- Bar Chart & Layout --- */
 .bar-chart {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  align-items: end;
-  gap: 10px;
-  min-height: 220px;
-  padding: 12px;
-  border-radius: 12px;
+  display: flex;
+  align-items: flex-end; /* Align bars to bottom */
+  gap: 8px; /* Space between year groups */
+  height: 220px;
+  padding: 12px 10px 30px; /* Bottom padding for labels */
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(61, 109, 242, 0.06), rgba(255, 255, 255, 0));
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(61, 109, 242, 0.03), rgba(255, 255, 255, 0));
+  overflow-x: auto; /* Scroll if many years */
 }
 
 .table-wrap {
@@ -261,23 +261,24 @@ tbody tr:hover {
   }
 }
 
-/* Stacked Bar & Group Layout */
+/* --- Bar Chart & Layout --- */
 .bar-group {
   display: flex;
-  gap: 8px;
+  gap: 4px; /* Space between Rent and Buy bars in one year */
   align-items: flex-end;
   height: 100%;
   position: relative;
+  min-width: 24px;
   justify-content: center;
-  min-width: 40px;
 }
 
-/* Base Bar Styles */
+/* --- Base Bar Styles --- */
 .bar {
-  width: 14px;
+  width: 12px;
   border-radius: 4px 4px 0 0;
-  transition: height 0.3s ease;
+  transition: height 0.3s ease, flex 0.3s ease;
   opacity: 0.9;
+  position: relative;
 }
 
 .bar:hover {
@@ -286,27 +287,26 @@ tbody tr:hover {
   transform-origin: bottom;
 }
 
-/* Stack Container for "Buy" Strategy */
+/* --- Stacked Bar Container (Buy Net Worth) --- */
 .bar-stack {
   display: flex;
-  flex-direction: column-reverse;
-  width: 14px;
-  height: 100%;
+  flex-direction: column-reverse; /* Bottom-up stack */
+  width: 12px;
+  height: 100%; /* Height is set by inline style based on total value */
   align-items: flex-end;
 }
-
 .bar-stack .bar {
   width: 100%;
   border-radius: 0;
 }
 .bar-stack .bar:first-child {
   border-radius: 0 0 2px 2px;
-}
+} /* Bottom */
 .bar-stack .bar:last-child {
   border-radius: 2px 2px 0 0;
-}
+} /* Top */
 
-/* Colors */
+/* --- Colors --- */
 .bar-rent {
   background: var(--accent);
 }
@@ -316,8 +316,23 @@ tbody tr:hover {
 .bar-liquid {
   background: #4caf50;
 }
+.bar-home-val {
+  background: #3d6df2;
+  overflow: hidden;
+} /* Container for debt overlay */
+.bar-debt {
+  background: rgba(179, 38, 30, 0.6);
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+.bar-rent-paid {
+  background: transparent;
+  border: 1px dashed #9fa3af;
+  z-index: 1;
+}
 
-/* CSS-Only Tooltip */
+/* --- CSS Tooltips --- */
 .bar-group::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -328,26 +343,27 @@ tbody tr:hover {
   color: #fff;
   padding: 8px 12px;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   white-space: pre;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
-  z-index: 10;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   margin-bottom: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 140px;
   text-align: center;
+  min-width: 140px;
 }
 .bar-group:hover::after {
   opacity: 1;
 }
 
-.bar-group .bar-label {
-  display: block;
+/* --- Labels --- */
+.bar-label {
   position: absolute;
-  bottom: -20px;
+  bottom: -25px;
   font-size: 0.7rem;
+  color: var(--muted);
   width: 100%;
   text-align: center;
 }
