@@ -277,12 +277,21 @@ const results = computed(() => {
   );
   const mortgageInitialInvestment = Math.max(initialInv - downPayment, 0);
   const investmentAfterMortgage = Math.max(monthlyInv - mortgagePayment, 0);
-  const mortgageInvestmentValue = futureValue(
+  const investmentDuringMortgage = futureValue(
     investmentAfterMortgage,
     data.annualMarketReturn,
     horizonYears,
     mortgageInitialInvestment
   );
+  const mortgageInvestmentValue =
+      investmentAfterMortgage > 0
+      ? futureValue(
+          monthlyInvestment.value,
+          data.annualMarketReturn,
+            investmentAfterMortgage,
+          investmentDuringMortgage
+        )
+      : investmentDuringMortgage;
   const remainingBalance = mortgageBalanceAfterYears(
     mortgagePrincipal,
     data.mortgageRate,
