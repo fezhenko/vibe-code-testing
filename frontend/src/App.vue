@@ -20,30 +20,30 @@
         <p class="helper">Rates auto-update to the country median assumptions.</p>
       </div>
       <div class="grid">
-      <div class="field">
-        <label for="period">Period</label>
-        <select id="period" v-model.number="years">
-          <option :value="5">5 years</option>
-          <option :value="10">10 years</option>
-          <option :value="15">15 years</option>
-          <option :value="20">20 years</option>
-          <option :value="25">20+ years (25)</option>
-        </select>
-        <p class="helper helper-spacer">Spacer</p>
-      </div>
+        <div class="field">
+          <label for="period">Period</label>
+          <select id="period" v-model.number="years">
+            <option :value="5">5 years</option>
+            <option :value="10">10 years</option>
+            <option :value="15">15 years</option>
+            <option :value="20">20 years</option>
+            <option :value="25">20+ years (25)</option>
+          </select>
+          <p class="helper helper-spacer">Spacer</p>
+        </div>
 
-      <div class="field">
-        <label for="monthly">Monthly cash available</label>
-        <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-        <p class="helper helper-spacer">Spacer</p>
-      </div>
+        <div class="field">
+          <label for="monthly">Monthly cash available</label>
+          <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment"/>
+          <p class="helper helper-spacer">Spacer</p>
+        </div>
 
-      <div class="field">
-        <label for="initial">Initial lump sum</label>
-        <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
-        <p class="helper helper-spacer">Spacer</p>
+        <div class="field">
+          <label for="initial">Initial lump sum</label>
+          <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment"/>
+          <p class="helper helper-spacer">Spacer</p>
+        </div>
       </div>
-    </div>
     </section>
 
     <section class="panel housing">
@@ -398,24 +398,21 @@ const investmentSchedule = computed(() => {
   const netWorthMax = rows.reduce((acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth), 0);
   const propertyMax = rows.reduce((acc, row) => Math.max(acc, row.homeValue, row.totalRentPaid), 0);
 
-  // Inside investmentSchedule computed property...
   return rows.map(row => ({
     ...row,
-    // ... existing height mappings ...
+    // Chart 1 Heights
     rentHeight: netWorthMax > 0 ? (row.rentPortfolio / netWorthMax) * 100 : 0,
     buyTotalHeight: netWorthMax > 0 ? (row.buyNetWorth / netWorthMax) * 100 : 0,
+    liquidFlex: row.buyStockPortfolio,
+    equityFlex: row.buyHomeEquity,
 
-    // Property Chart Heights
+    // Chart 2 Heights
     homeValHeight: propertyMax > 0 ? (row.homeValue / propertyMax) * 100 : 0,
     rentPaidHeight: propertyMax > 0 ? (row.totalRentPaid / propertyMax) * 100 : 0,
 
-    // ADD THIS BACK:
-    // Calculates what % of the home value is debt (for the overlay bar)
     debtHeight: row.homeValue > 0 ? (row.mortgageDebt / row.homeValue) * 100 : 0,
 
-    // Keep these for flexibility if you switch to stacked views later
-    liquidFlex: row.buyStockPortfolio,
-    equityFlex: row.buyHomeEquity,
+    // Flex values
     debtFlex: row.mortgageDebt,
     propEquityFlex: row.homeValue - row.mortgageDebt
   }));
