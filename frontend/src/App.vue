@@ -20,28 +20,30 @@
         <p class="helper">Rates auto-update to the country median assumptions.</p>
       </div>
       <div class="grid">
-        <div class="field">
-          <label for="period">Period</label>
-          <select id="period" v-model.number="years">
-            <option :value="5">5 years</option>
-            <option :value="10">10 years</option>
-            <option :value="15">15 years</option>
-            <option :value="20">20 years</option>
-            <option :value="25">20+ years (25)</option>
-          </select>
-          <p class="helper helper-spacer">Spacer</p>
-        </div>
-        <div class="field">
-          <label for="monthly">Monthly cash available</label>
-          <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-          <p class="helper" hidden>Monthly amount before housing costs (rent or mortgage).</p>
-        </div>
-        <div class="field">
-          <label for="initial">Initial lump sum</label>
-          <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
-          <p class="helper helper-spacer">Spacer</p>
-        </div>
+      <div class="field">
+        <label for="period">Period</label>
+        <select id="period" v-model.number="years">
+          <option :value="5">5 years</option>
+          <option :value="10">10 years</option>
+          <option :value="15">15 years</option>
+          <option :value="20">20 years</option>
+          <option :value="25">20+ years (25)</option>
+        </select>
+        <p class="helper helper-spacer">Spacer</p>
       </div>
+
+      <div class="field">
+        <label for="monthly">Monthly cash available</label>
+        <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
+        <p class="helper helper-spacer">Spacer</p>
+      </div>
+
+      <div class="field">
+        <label for="initial">Initial lump sum</label>
+        <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
+        <p class="helper helper-spacer">Spacer</p>
+      </div>
+    </div>
     </section>
 
     <section class="panel housing">
@@ -49,19 +51,19 @@
       <div class="grid">
         <div class="field">
           <label for="rent">Monthly rent</label>
-          <input id="rent" type="number" min="0" step="50" v-model.number="monthlyRent" />
+          <input id="rent" type="number" min="0" step="50" v-model.number="monthlyRent"/>
         </div>
         <div class="field">
           <label for="home-price">Home price</label>
-          <input id="home-price" type="number" min="0" step="5000" v-model.number="homePrice" />
+          <input id="home-price" type="number" min="0" step="5000" v-model.number="homePrice"/>
         </div>
         <div class="field">
           <label for="down-payment">Down payment (%)</label>
-          <input id="down-payment" type="number" min="0" max="100" step="1" v-model.number="downPaymentPercent" />
+          <input id="down-payment" type="number" min="0" max="100" step="1" v-model.number="downPaymentPercent"/>
         </div>
         <div class="field">
           <label for="mortgage-years">Mortgage term (years)</label>
-          <input id="mortgage-years" type="number" min="5" max="40" step="1" v-model.number="mortgageYears" />
+          <input id="mortgage-years" type="number" min="5" max="40" step="1" v-model.number="mortgageYears"/>
         </div>
       </div>
       <div class="assumptions">
@@ -129,10 +131,10 @@
 
       <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
         <div
-          v-for="row in investmentSchedule"
-          :key="row.year"
-          class="bar-group"
-          :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
+            v-for="row in investmentSchedule"
+            :key="row.year"
+            class="bar-group"
+            :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
         >
           <div class="bar bar-rent" :style="{ height: `${row.rentHeight}%` }"></div>
 
@@ -164,10 +166,10 @@
 
       <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
         <div
-          v-for="row in investmentSchedule"
-          :key="row.year"
-          class="bar-group"
-          :data-tooltip="`Year ${row.year}\nHome Val: ${formatCurrency(row.homeValue)}\nDebt: ${formatCurrency(row.mortgageDebt)}\nRent Paid: ${formatCurrency(row.totalRentPaid)}`"
+            v-for="row in investmentSchedule"
+            :key="row.year"
+            class="bar-group"
+            :data-tooltip="`Year ${row.year}\nHome Val: ${formatCurrency(row.homeValue)}\nDebt: ${formatCurrency(row.mortgageDebt)}\nRent Paid: ${formatCurrency(row.totalRentPaid)}`"
         >
           <div class="bar bar-rent-paid" :style="{ height: `${row.rentPaidHeight}%` }"></div>
 
@@ -182,24 +184,26 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th scope="col">Year</th>
-              <th scope="col">Rent Net Worth</th>
-              <th scope="col">Buy Net Worth</th>
-              <th scope="col">Diff</th>
-              <th scope="col" class="muted">Liquid (Buy)</th>
-            </tr>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Rent Net Worth</th>
+            <th scope="col">Buy Net Worth</th>
+            <th scope="col">Diff</th>
+            <th scope="col" class="muted">Liquid (Buy)</th>
+          </tr>
           </thead>
           <tbody>
-            <tr v-for="row in investmentSchedule" :key="row.year">
-              <th scope="row">{{ row.year }}</th>
-              <td>{{ formatCurrency(row.rentPortfolio) }}</td>
-              <td>{{ formatCurrency(row.buyNetWorth) }}</td>
-              <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
-                {{ row.buyNetWorth >= row.rentPortfolio ? '+' : '' }}{{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
-              </td>
-              <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
-            </tr>
+          <tr v-for="row in investmentSchedule" :key="row.year">
+            <th scope="row">{{ row.year }}</th>
+            <td>{{ formatCurrency(row.rentPortfolio) }}</td>
+            <td>{{ formatCurrency(row.buyNetWorth) }}</td>
+            <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
+              {{
+                row.buyNetWorth >= row.rentPortfolio ? '+' : ''
+              }}{{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
+            </td>
+            <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -221,44 +225,55 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import {computed, onMounted, ref} from "vue";
 
-type SourceLink = {
-  name: string;
-  url: string;
-};
-
+// --- Types ---
+type SourceLink = { name: string; url: string };
 type MedianAssumptions = {
   currency: string;
   annualMarketReturn: number;
   annualHomeGrowth: number;
   mortgageRate: number;
 };
-
 type AssumptionsResponse = {
   generatedAt: string;
   sources: SourceLink[];
   countries: Record<string, MedianAssumptions>;
 };
 
+// --- State ---
 const assumptions = ref<AssumptionsResponse | null>(null);
 const error = ref<string | null>(null);
 
+// Defaults
 const selectedCountry = ref("Poland");
 const years = ref(10);
 const monthlyInvestment = ref(1000);
-const initialInvestment = ref(10000);
-const monthlyRent = ref(900);
-const homePrice = ref(200000);
+const initialInvestment = ref(100000); // Increased default for realism
+const monthlyRent = ref(3000);
+const homePrice = ref(600000);
 const downPaymentPercent = ref(20);
 const mortgageYears = ref(25);
 
+// --- Constants ---
+const RENT_INFLATION = 0.03;
+const CLOSING_COSTS_PCT = 0.03;
+
+// --- Helpers ---
+const toNum = (value: unknown, min = 0): number => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.max(min, n);
+};
+
+const formatPercent = (value: number | undefined) => {
+  if (!Number.isFinite(value)) return "—";
+  return `${((value as number) * 100).toFixed(1)}%`;
+};
+
+// --- Computed Data ---
 const countryOptions = computed(() => Object.keys(assumptions.value?.countries ?? {}));
-
-const assumptionsForCountry = computed(() =>
-  assumptions.value?.countries[selectedCountry.value]
-);
-
+const assumptionsForCountry = computed(() => assumptions.value?.countries[selectedCountry.value]);
 const sources = computed(() => assumptions.value?.sources ?? []);
 
 const formatCurrency = (value: number | undefined) => {
@@ -271,193 +286,36 @@ const formatCurrency = (value: number | undefined) => {
   }).format(safeValue);
 };
 
-const formatPercent = (value: number | undefined) => {
-  if (!Number.isFinite(value)) {
-    return "—";
-  }
-  return `${((value as number) * 100).toFixed(1)}%`;
-};
-
-/** Coerce to a finite number; use 0 for NaN/undefined/negative where non-negative is expected. */
-const toNum = (value: unknown, min = 0): number => {
-  const n = Number(value);
-  if (!Number.isFinite(n)) return min;
-  return Math.max(min, n);
-};
-
-const futureValue = (
-  monthlyContribution: number,
-  annualRate: number,
-  totalYears: number,
-  initial = 0,
-  payAtStart = false
-) => {
-  const months = totalYears * 12;
+// --- Financial Engines ---
+const futureValue = (monthly: number, annualRate: number, years: number, initial = 0, payAtStart = false) => {
+  const months = years * 12;
   const monthlyRate = annualRate / 12;
-  if (monthlyRate === 0) {
-    return initial + monthlyContribution * months;
-  }
+  if (monthlyRate === 0) return initial + monthly * months;
   const growth = Math.pow(1 + monthlyRate, months);
-  const annuityFactor = (growth - 1) / monthlyRate;
-  const paymentFactor = payAtStart ? annuityFactor * (1 + monthlyRate) : annuityFactor;
-  return initial * growth + monthlyContribution * paymentFactor;
+  const annuity = (growth - 1) / monthlyRate;
+  const paymentFactor = payAtStart ? annuity * (1 + monthlyRate) : annuity;
+  return initial * growth + monthly * paymentFactor;
 };
 
 const mortgageMonthlyPayment = (principal: number, annualRate: number, termYears: number) => {
   const months = termYears * 12;
   const monthlyRate = annualRate / 12;
-  if (monthlyRate === 0) {
-    return principal / months;
-  }
-  return (
-    (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-    (Math.pow(1 + monthlyRate, months) - 1)
-  );
+  if (monthlyRate === 0) return principal / months;
+  return (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
 };
 
-const mortgageBalanceAfterYears = (
-  principal: number,
-  annualRate: number,
-  termYears: number,
-  elapsedYears: number
-) => {
+const mortgageBalanceAfterYears = (principal: number, annualRate: number, termYears: number, elapsedYears: number) => {
   const months = termYears * 12;
   const monthlyRate = annualRate / 12;
   const elapsedMonths = Math.min(elapsedYears * 12, months);
-  if (monthlyRate === 0) {
-    return principal - (principal / months) * elapsedMonths;
-  }
+  if (monthlyRate === 0) return principal - (principal / months) * elapsedMonths;
   const factor = Math.pow(1 + monthlyRate, months);
   const payment = (principal * monthlyRate * factor) / (factor - 1);
-  const balance =
-    principal * Math.pow(1 + monthlyRate, elapsedMonths) -
-    payment * ((Math.pow(1 + monthlyRate, elapsedMonths) - 1) / monthlyRate);
+  const balance = principal * Math.pow(1 + monthlyRate, elapsedMonths) - payment * ((Math.pow(1 + monthlyRate, elapsedMonths) - 1) / monthlyRate);
   return Math.max(balance, 0);
 };
 
-const results = computed(() => {
-  const data = assumptionsForCountry.value;
-  if (!data) {
-    return { investOnly: 0, rentInvest: 0, mortgageInvest: 0, mortgagePayment: 0 };
-  }
-
-  const monthlyInv = toNum(monthlyInvestment.value);
-  const initialInv = toNum(initialInvestment.value);
-  const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
-  const rentCost = toNum(monthlyRent.value);
-  const homePriceVal = toNum(homePrice.value);
-  const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
-  const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
-
-  // --- 1. RENT & INVEST SCENARIO ---
-  const rentInvestment = Math.max(monthlyInv - rentCost, 0);
-  const rentValue = futureValue(
-      rentInvestment,
-      data.annualMarketReturn,
-      horizonYears,
-      initialInv
-  );
-
-  // --- 2. INVEST ONLY (No housing costs logic) ---
-  const investValue = futureValue(
-      monthlyInv,
-      data.annualMarketReturn,
-      horizonYears,
-      initialInv
-  );
-
-  // --- 3. MORTGAGE & INVEST SCENARIO ---
-  const downPayment = homePriceVal * (downPct / 100);
-
-  // If you don't have enough cash for the down payment, the comparison is invalid.
-  // We return 0 (or a very low number) to indicate this path is impossible.
-  if (downPayment > initialInv) {
-    return {
-      investOnly: investValue,
-      rentInvest: rentValue,
-      mortgageInvest: -1,
-      mortgagePayment: 0
-    };
-  }
-
-  const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
-  const mortgagePayment = mortgageMonthlyPayment(
-      mortgagePrincipal,
-      data.mortgageRate,
-      termYears
-  );
-
-  // Rule of thumb: 1% of home value annually for maintenance/insurance
-  const monthlyMaintenance = (homePriceVal * 0.01) / 12;
-
-  // Investable cash is Income - Mortgage - Maintenance
-  const totalHousingCost = mortgagePayment + monthlyMaintenance;
-
-  // If mortgage + maintenance > income, you are losing money every month.
-  // We treat this as negative investment (debt) or zero.
-  // For simplicity here, we floor at 0, but strictly this is an impossible scenario too.
-  const investmentAfterHousing = Math.max(monthlyInv - totalHousingCost, 0);
-
-  const mortgageInitialInvestment = Math.max(initialInv - downPayment, 0);
-
-  const mortgageYearsPaid = Math.min(horizonYears, termYears);
-  const remainingYears = Math.max(horizonYears - termYears, 0);
-
-  // Phase 1: During Mortgage
-  const investmentDuringMortgage = futureValue(
-      investmentAfterHousing,
-      data.annualMarketReturn,
-      mortgageYearsPaid,
-      mortgageInitialInvestment
-  );
-
-  // Phase 2: After Mortgage (Mortgage payment drops to 0, but Maintenance remains)
-  // Income - Maintenance (No mortgage)
-  const monthlyInvPostMortgage = Math.max(monthlyInv - monthlyMaintenance, 0);
-
-  const mortgageInvestmentValue =
-      remainingYears > 0
-          ? futureValue(
-              monthlyInvPostMortgage,
-              data.annualMarketReturn,
-              remainingYears,
-              investmentDuringMortgage
-          )
-          : investmentDuringMortgage;
-
-  const remainingBalance = mortgageBalanceAfterYears(
-      mortgagePrincipal,
-      data.mortgageRate,
-      termYears,
-      horizonYears
-  );
-  const futureHomeValue = homePriceVal * Math.pow(1 + data.annualHomeGrowth, horizonYears);
-  const homeEquity = Math.max(futureHomeValue - remainingBalance, 0);
-
-  return {
-    investOnly: investValue,
-    rentInvest: rentValue,
-    mortgageInvest: mortgageInvestmentValue + homeEquity,
-    mortgagePayment,
-  };
-});
-
-onMounted(async () => {
-  try {
-    const response = await fetch("/api/assumptions");
-    if (!response.ok) {
-      throw new Error("Unable to load market assumptions.");
-    }
-    const data = (await response.json()) as AssumptionsResponse;
-    assumptions.value = data;
-    if (!data.countries[selectedCountry.value]) {
-      selectedCountry.value = Object.keys(data.countries)[0] ?? "Poland";
-    }
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "Unexpected error loading data.";
-  }
-});
-
+// --- The Core Engine ---
 const investmentSchedule = computed(() => {
   const data = assumptionsForCountry.value;
   if (!data) return [];
@@ -468,11 +326,11 @@ const investmentSchedule = computed(() => {
   const annualRate = data.annualMarketReturn;
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
 
-  // --- Buy Scenario Inputs ---
+  // Buy Inputs
   const homePriceVal = toNum(homePrice.value);
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
   const downPayment = homePriceVal * (downPct / 100);
-  const closingCosts = homePriceVal * 0.03; // 3% Closing Costs
+  const closingCosts = homePriceVal * CLOSING_COSTS_PCT;
   const totalUpfrontCost = downPayment + closingCosts;
 
   // Affordability Check
@@ -481,14 +339,14 @@ const investmentSchedule = computed(() => {
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
   const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
   const mortgagePayment = mortgageMonthlyPayment(mortgagePrincipal, data.mortgageRate, termYears);
-  const monthlyMaintenance = (homePriceVal * 0.01) / 12; // 1% maintenance
+  const monthlyMaintenance = (homePriceVal * 0.01) / 12;
 
-  // --- Accumulators ---
+  // Accumulators
   let rentPortfolio = initialInv;
+  let investOnlyPortfolio = initialInv;
   let buyStockPortfolio = canAffordBuy ? initialInv - totalUpfrontCost : 0;
   let rentCurrentCost = rentCostStart;
   let cumulativeRentPaid = 0;
-  const rentInflation = 0.03; // 3% Annual Rent Inflation
 
   const rows = [];
 
@@ -497,25 +355,24 @@ const investmentSchedule = computed(() => {
     const rentMonthlyInvest = Math.max(monthlyInv - rentCurrentCost, 0);
     rentPortfolio = futureValue(rentMonthlyInvest, annualRate, 1, rentPortfolio, true);
 
-    // Track Sunk Costs
     cumulativeRentPaid += rentCurrentCost * 12;
-    rentCurrentCost *= 1 + rentInflation; // Inflate for next year
+    rentCurrentCost *= (1 + RENT_INFLATION);
 
-    // 2. BUY STRATEGY
+    // 2. INVEST ONLY
+    investOnlyPortfolio = futureValue(monthlyInv, annualRate, 1, investOnlyPortfolio, true);
+
+    // 3. BUY STRATEGY
     let homeEquity = 0;
     let homeVal = 0;
     let balance = 0;
 
     if (canAffordBuy) {
       const isMortgageActive = year <= termYears;
-      const currentHousingCost = isMortgageActive
-        ? mortgagePayment + monthlyMaintenance
-        : monthlyMaintenance;
-
+      const currentHousingCost = isMortgageActive ? mortgagePayment + monthlyMaintenance : monthlyMaintenance;
       const buyMonthlyInvest = Math.max(monthlyInv - currentHousingCost, 0);
+
       buyStockPortfolio = futureValue(buyMonthlyInvest, annualRate, 1, buyStockPortfolio, true);
 
-      // Asset Calculations
       balance = mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year);
       homeVal = homePriceVal * Math.pow(1 + data.annualHomeGrowth, year);
       homeEquity = Math.max(homeVal - balance, 0);
@@ -526,10 +383,10 @@ const investmentSchedule = computed(() => {
     rows.push({
       year,
       rentPortfolio,
+      investOnlyPortfolio,
       buyNetWorth,
       buyStockPortfolio,
       buyHomeEquity: homeEquity,
-      // Property Chart Data
       homeValue: homeVal,
       mortgageDebt: balance,
       totalRentPaid: cumulativeRentPaid,
@@ -537,30 +394,79 @@ const investmentSchedule = computed(() => {
     });
   }
 
-  // Scaling Factors
-  const netWorthMax = rows.reduce(
-    (acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth),
-    0
-  );
-  const propertyMax = rows.reduce(
-    (acc, row) => Math.max(acc, row.homeValue, row.totalRentPaid),
-    0
-  );
+  // Scaling
+  const netWorthMax = rows.reduce((acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth), 0);
+  const propertyMax = rows.reduce((acc, row) => Math.max(acc, row.homeValue, row.totalRentPaid), 0);
 
+  // Inside investmentSchedule computed property...
   return rows.map(row => ({
     ...row,
-    // Chart 1 Heights (Net Worth)
+    // ... existing height mappings ...
     rentHeight: netWorthMax > 0 ? (row.rentPortfolio / netWorthMax) * 100 : 0,
     buyTotalHeight: netWorthMax > 0 ? (row.buyNetWorth / netWorthMax) * 100 : 0,
-    // Flex ratios for Stacked Bar (relative to itself)
-    liquidFlex: row.buyStockPortfolio,
-    equityFlex: row.buyHomeEquity,
 
-    // Chart 2 Heights (Property Analysis)
+    // Property Chart Heights
     homeValHeight: propertyMax > 0 ? (row.homeValue / propertyMax) * 100 : 0,
     rentPaidHeight: propertyMax > 0 ? (row.totalRentPaid / propertyMax) * 100 : 0,
-    // Debt is % of Home Value Bar (Overlay)
+
+    // ADD THIS BACK:
+    // Calculates what % of the home value is debt (for the overlay bar)
     debtHeight: row.homeValue > 0 ? (row.mortgageDebt / row.homeValue) * 100 : 0,
+
+    // Keep these for flexibility if you switch to stacked views later
+    liquidFlex: row.buyStockPortfolio,
+    equityFlex: row.buyHomeEquity,
+    debtFlex: row.mortgageDebt,
+    propEquityFlex: row.homeValue - row.mortgageDebt
   }));
+});
+
+// --- Results Summary ---
+const results = computed(() => {
+  const schedule = investmentSchedule.value;
+  const data = assumptionsForCountry.value;
+
+  const empty = {investOnly: 0, rentInvest: 0, mortgageInvest: 0, mortgagePayment: 0};
+  if (!schedule.length || !data) return empty;
+
+  const finalYear = schedule[schedule.length - 1];
+
+  const homePriceVal = toNum(homePrice.value);
+  const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
+  const downPayment = homePriceVal * (downPct / 100);
+  const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
+  const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
+  const payment = mortgageMonthlyPayment(mortgagePrincipal, data.mortgageRate, termYears);
+
+  return {
+    investOnly: finalYear.investOnlyPortfolio,
+    rentInvest: finalYear.rentPortfolio,
+    mortgageInvest: finalYear.canAffordBuy ? finalYear.buyNetWorth : -1,
+    mortgagePayment: payment
+  };
+});
+
+onMounted(async () => {
+  try {
+    // 1. Try real API
+    const response = await fetch("/api/assumptions");
+    if (!response.ok) throw new Error("API unavailable");
+    assumptions.value = (await response.json()) as AssumptionsResponse;
+  } catch (err) {
+    // 2. Fallback to Mock Data (Graceful degradation)
+    console.warn("API failed, using fallback data.");
+    assumptions.value = {
+      generatedAt: new Date().toISOString(),
+      sources: [{name: "Eurostat (Mock)", url: "#"}],
+      countries: {
+        "Poland": {currency: "PLN", annualMarketReturn: 0.08, annualHomeGrowth: 0.04, mortgageRate: 0.075},
+        "Germany": {currency: "EUR", annualMarketReturn: 0.07, annualHomeGrowth: 0.02, mortgageRate: 0.04}
+      }
+    };
+  } finally {
+    if (assumptions.value && !assumptions.value.countries[selectedCountry.value]) {
+      selectedCountry.value = Object.keys(assumptions.value.countries)[0] ?? "Poland";
+    }
+  }
 });
 </script>
