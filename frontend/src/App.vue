@@ -20,28 +20,30 @@
         <p class="helper">Rates auto-update to the country median assumptions.</p>
       </div>
       <div class="grid">
-        <div class="field">
-          <label for="period">Period</label>
-          <select id="period" v-model.number="years">
-            <option :value="5">5 years</option>
-            <option :value="10">10 years</option>
-            <option :value="15">15 years</option>
-            <option :value="20">20 years</option>
-            <option :value="25">20+ years (25)</option>
-          </select>
-          <p class="helper helper-spacer">Spacer</p>
-        </div>
-        <div class="field">
-          <label for="monthly">Monthly cash available</label>
-          <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-          <p class="helper" hidden>Monthly amount before housing costs (rent or mortgage).</p>
-        </div>
-        <div class="field">
-          <label for="initial">Initial lump sum</label>
-          <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
-          <p class="helper helper-spacer">Spacer</p>
-        </div>
+      <div class="field">
+        <label for="period">Period</label>
+        <select id="period" v-model.number="years">
+          <option :value="5">5 years</option>
+          <option :value="10">10 years</option>
+          <option :value="15">15 years</option>
+          <option :value="20">20 years</option>
+          <option :value="25">20+ years (25)</option>
+        </select>
+        <p class="helper helper-spacer">Spacer</p>
       </div>
+
+      <div class="field">
+        <label for="monthly">Monthly cash available</label>
+        <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
+        <p class="helper helper-spacer">Spacer</p>
+      </div>
+
+      <div class="field">
+        <label for="initial">Initial lump sum</label>
+        <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
+        <p class="helper helper-spacer">Spacer</p>
+      </div>
+    </div>
     </section>
 
     <section class="panel housing">
@@ -49,19 +51,19 @@
       <div class="grid">
         <div class="field">
           <label for="rent">Monthly rent</label>
-          <input id="rent" type="number" min="0" step="50" v-model.number="monthlyRent" />
+          <input id="rent" type="number" min="0" step="50" v-model.number="monthlyRent"/>
         </div>
         <div class="field">
           <label for="home-price">Home price</label>
-          <input id="home-price" type="number" min="0" step="5000" v-model.number="homePrice" />
+          <input id="home-price" type="number" min="0" step="5000" v-model.number="homePrice"/>
         </div>
         <div class="field">
           <label for="down-payment">Down payment (%)</label>
-          <input id="down-payment" type="number" min="0" max="100" step="1" v-model.number="downPaymentPercent" />
+          <input id="down-payment" type="number" min="0" max="100" step="1" v-model.number="downPaymentPercent"/>
         </div>
         <div class="field">
           <label for="mortgage-years">Mortgage term (years)</label>
-          <input id="mortgage-years" type="number" min="5" max="40" step="1" v-model.number="mortgageYears" />
+          <input id="mortgage-years" type="number" min="5" max="40" step="1" v-model.number="mortgageYears"/>
         </div>
       </div>
       <div class="assumptions">
@@ -129,10 +131,10 @@
 
       <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
         <div
-          v-for="row in investmentSchedule"
-          :key="row.year"
-          class="bar-group"
-          :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
+            v-for="row in investmentSchedule"
+            :key="row.year"
+            class="bar-group"
+            :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
         >
           <div class="bar bar-rent" :style="{ height: `${row.rentHeight}%` }"></div>
 
@@ -164,10 +166,10 @@
 
       <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
         <div
-          v-for="row in investmentSchedule"
-          :key="row.year"
-          class="bar-group"
-          :data-tooltip="`Year ${row.year}\nHome Val: ${formatCurrency(row.homeValue)}\nDebt: ${formatCurrency(row.mortgageDebt)}\nRent Paid: ${formatCurrency(row.totalRentPaid)}`"
+            v-for="row in investmentSchedule"
+            :key="row.year"
+            class="bar-group"
+            :data-tooltip="`Year ${row.year}\nHome Val: ${formatCurrency(row.homeValue)}\nDebt: ${formatCurrency(row.mortgageDebt)}\nRent Paid: ${formatCurrency(row.totalRentPaid)}`"
         >
           <div class="bar bar-rent-paid" :style="{ height: `${row.rentPaidHeight}%` }"></div>
 
@@ -182,24 +184,26 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr>
-              <th scope="col">Year</th>
-              <th scope="col">Rent Net Worth</th>
-              <th scope="col">Buy Net Worth</th>
-              <th scope="col">Diff</th>
-              <th scope="col" class="muted">Liquid (Buy)</th>
-            </tr>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Rent Net Worth</th>
+            <th scope="col">Buy Net Worth</th>
+            <th scope="col">Diff</th>
+            <th scope="col" class="muted">Liquid (Buy)</th>
+          </tr>
           </thead>
           <tbody>
-            <tr v-for="row in investmentSchedule" :key="row.year">
-              <th scope="row">{{ row.year }}</th>
-              <td>{{ formatCurrency(row.rentPortfolio) }}</td>
-              <td>{{ formatCurrency(row.buyNetWorth) }}</td>
-              <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
-                {{ row.buyNetWorth >= row.rentPortfolio ? '+' : '' }}{{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
-              </td>
-              <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
-            </tr>
+          <tr v-for="row in investmentSchedule" :key="row.year">
+            <th scope="row">{{ row.year }}</th>
+            <td>{{ formatCurrency(row.rentPortfolio) }}</td>
+            <td>{{ formatCurrency(row.buyNetWorth) }}</td>
+            <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
+              {{
+                row.buyNetWorth >= row.rentPortfolio ? '+' : ''
+              }}{{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
+            </td>
+            <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
+          </tr>
           </tbody>
         </table>
       </div>
@@ -221,7 +225,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import {computed, onMounted, ref} from "vue";
 
 // --- Types ---
 type SourceLink = { name: string; url: string };
@@ -394,24 +398,24 @@ const investmentSchedule = computed(() => {
   const netWorthMax = rows.reduce((acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth), 0);
   const propertyMax = rows.reduce((acc, row) => Math.max(acc, row.homeValue, row.totalRentPaid), 0);
 
+  // Inside investmentSchedule computed property...
   return rows.map(row => ({
     ...row,
-    // Chart 1: Net Worth
+    // ... existing height mappings ...
     rentHeight: netWorthMax > 0 ? (row.rentPortfolio / netWorthMax) * 100 : 0,
     buyTotalHeight: netWorthMax > 0 ? (row.buyNetWorth / netWorthMax) * 100 : 0,
-    liquidFlex: row.buyStockPortfolio,
-    equityFlex: row.buyHomeEquity,
 
-    // Chart 2: Property Analysis (Stacked Calculation)
-    // We want the total stack to equal homeValHeight.
-    // Bottom: Debt. Top: Equity (Wait! Home Value = Debt + Equity)
-    // Actually, HomeEquity = HomeValue - Debt.
-    // So we can stack Debt (bottom) and Equity (top) to visualize the full Asset Value.
-
+    // Property Chart Heights
     homeValHeight: propertyMax > 0 ? (row.homeValue / propertyMax) * 100 : 0,
     rentPaidHeight: propertyMax > 0 ? (row.totalRentPaid / propertyMax) * 100 : 0,
 
-    // Flex values for the Property Stack
+    // ADD THIS BACK:
+    // Calculates what % of the home value is debt (for the overlay bar)
+    debtHeight: row.homeValue > 0 ? (row.mortgageDebt / row.homeValue) * 100 : 0,
+
+    // Keep these for flexibility if you switch to stacked views later
+    liquidFlex: row.buyStockPortfolio,
+    equityFlex: row.buyHomeEquity,
     debtFlex: row.mortgageDebt,
     propEquityFlex: row.homeValue - row.mortgageDebt
   }));
@@ -422,7 +426,7 @@ const results = computed(() => {
   const schedule = investmentSchedule.value;
   const data = assumptionsForCountry.value;
 
-  const empty = { investOnly: 0, rentInvest: 0, mortgageInvest: 0, mortgagePayment: 0 };
+  const empty = {investOnly: 0, rentInvest: 0, mortgageInvest: 0, mortgagePayment: 0};
   if (!schedule.length || !data) return empty;
 
   const finalYear = schedule[schedule.length - 1];
@@ -447,8 +451,7 @@ onMounted(async () => {
     // 1. Try real API
     const response = await fetch("/api/assumptions");
     if (!response.ok) throw new Error("API unavailable");
-    const data = (await response.json()) as AssumptionsResponse;
-    assumptions.value = data;
+    assumptions.value = (await response.json()) as AssumptionsResponse;
   } catch (err) {
     // 2. Fallback to Mock Data (Graceful degradation)
     console.warn("API failed, using fallback data.");
@@ -456,8 +459,8 @@ onMounted(async () => {
       generatedAt: new Date().toISOString(),
       sources: [{name: "Eurostat (Mock)", url: "#"}],
       countries: {
-        "Poland": { currency: "PLN", annualMarketReturn: 0.08, annualHomeGrowth: 0.04, mortgageRate: 0.075 },
-        "Germany": { currency: "EUR", annualMarketReturn: 0.07, annualHomeGrowth: 0.02, mortgageRate: 0.04 }
+        "Poland": {currency: "PLN", annualMarketReturn: 0.08, annualHomeGrowth: 0.04, mortgageRate: 0.075},
+        "Germany": {currency: "EUR", annualMarketReturn: 0.07, annualHomeGrowth: 0.02, mortgageRate: 0.04}
       }
     };
   } finally {
