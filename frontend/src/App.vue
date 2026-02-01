@@ -33,6 +33,7 @@
         <div class="field">
           <label for="monthly">Monthly investment</label>
           <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
+          <p class="helper">Amount available for investing each month. For Rent & invest, rent is subtracted from this.</p>
         </div>
         <div class="field">
           <label for="initial">Initial lump sum</label>
@@ -52,7 +53,7 @@
         <div class="result-card">
           <h3>Rent &amp; invest</h3>
           <p class="result-value">{{ formatCurrency(results.rentInvest) }}</p>
-          <p class="muted">Invests what remains after monthly rent is paid.</p>
+          <p class="muted">Portfolio value when you invest (monthly investment − monthly rent) each month, plus initial lump sum.</p>
         </div>
         <div class="result-card">
           <h3>Mortgage &amp; invest</h3>
@@ -181,6 +182,13 @@ const formatPercent = (value: number | undefined) => {
   return `${((value as number) * 100).toFixed(1)}%`;
 };
 
+/** Coerce to a finite number; use 0 for NaN/undefined/negative where non-negative is expected. */
+const toNum = (value: unknown, min = 0): number => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return min;
+  return Math.max(min, n);
+};
+
 const futureValue = (
   monthlyContribution: number,
   annualRate: number,
@@ -236,44 +244,54 @@ const results = computed(() => {
     return { investOnly: 0, rentInvest: 0, mortgageInvest: 0, mortgagePayment: 0 };
   }
 
+  const monthlyInv = toNum(monthlyInvestment.value);
+  const initialInv = toNum(initialInvestment.value);
+  const monthlyRentVal = toNum(monthlyRent.value);
+  const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
+  const homePriceVal = toNum(homePrice.value);
+  const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
+  const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
+
   const investValue = futureValue(
-    monthlyInvestment.value,
+    monthlyInv,
     data.annualMarketReturn,
-    years.value,
-    initialInvestment.value
-  );
-  const rentAdjustedInvestment = Math.max(monthlyInvestment.value - monthlyRent.value, 0);
-  const rentValue = futureValue(
-    rentAdjustedInvestment,
-    data.annualMarketReturn,
-    years.value,
-    initialInvestment.value
+    horizonYears,
+    initialInv
   );
 
-  const downPayment = homePrice.value * (downPaymentPercent.value / 100);
-  const mortgagePrincipal = Math.max(homePrice.value - downPayment, 0);
+  // Rent & invest: amount available for investing minus rent paid each month
+  const rentAdjustedMonthly = Math.max(monthlyInv - monthlyRentVal, 0);
+  const rentValue = futureValue(
+    rentAdjustedMonthly,
+    data.annualMarketReturn,
+    horizonYears,
+    initialInv
+  );
+
+  const downPayment = homePriceVal * (downPct / 100);
+  const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
   const mortgagePayment = mortgageMonthlyPayment(
     mortgagePrincipal,
     data.mortgageRate,
-    mortgageYears.value
+    termYears
   );
-  const mortgageInitialInvestment = Math.max(initialInvestment.value - downPayment, 0);
-  const investmentAfterMortgage = Math.max(monthlyInvestment.value - mortgagePayment, 0);
+  const mortgageInitialInvestment = Math.max(initialInv - downPayment, 0);
+  const investmentAfterMortgage = Math.max(monthlyInv - mortgagePayment, 0);
   const mortgageInvestmentValue = futureValue(
     investmentAfterMortgage,
     data.annualMarketReturn,
-    years.value,
+    horizonYears,
     mortgageInitialInvestment
   );
   const remainingBalance = mortgageBalanceAfterYears(
     mortgagePrincipal,
     data.mortgageRate,
-    mortgageYears.value,
-    years.value
+    termYears,
+    horizonYears
   );
-  const futureHomeValue = homePrice.value * Math.pow(1 + data.annualHomeGrowth, years.value);
+  const futureHomeValue = homePriceVal * Math.pow(1 + data.annualHomeGrowth, horizonYears);
   const homeEquity = Math.max(futureHomeValue - remainingBalance, 0);
-  const mortgageMonthsPaid = Math.min(years.value, mortgageYears.value) * 12;
+  const mortgageMonthsPaid = Math.min(horizonYears, termYears) * 12;
   const totalPayments = mortgagePayment * mortgageMonthsPaid;
   const principalPaid = mortgagePrincipal - remainingBalance;
   const interestPaid = Math.max(totalPayments - principalPaid, 0);
