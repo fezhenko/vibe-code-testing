@@ -29,15 +29,17 @@
             <option :value="20">20 years</option>
             <option :value="25">20+ years (25)</option>
           </select>
+          <p class="helper helper-spacer">Spacer</p>
         </div>
         <div class="field">
           <label for="monthly">Monthly investment</label>
           <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-          <p class="helper">Amount available for investing each month. For Rent & invest, rent is subtracted from this.</p>
+          <p class="helper">Amount invested each month across the scenarios.</p>
         </div>
         <div class="field">
           <label for="initial">Initial lump sum</label>
           <input id="initial" type="number" min="0" step="500" v-model.number="initialInvestment" />
+          <p class="helper helper-spacer">Spacer</p>
         </div>
       </div>
     </section>
@@ -53,7 +55,7 @@
         <div class="result-card">
           <h3>Rent &amp; invest</h3>
           <p class="result-value">{{ formatCurrency(results.rentInvest) }}</p>
-          <p class="muted">Portfolio value when you invest (monthly investment − monthly rent) each month, plus initial lump sum.</p>
+          <p class="muted">Portfolio value when you invest the monthly amount each month, plus initial lump sum.</p>
         </div>
         <div class="result-card">
           <h3>Mortgage &amp; invest</h3>
@@ -246,7 +248,6 @@ const results = computed(() => {
 
   const monthlyInv = toNum(monthlyInvestment.value);
   const initialInv = toNum(initialInvestment.value);
-  const monthlyRentVal = toNum(monthlyRent.value);
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
   const homePriceVal = toNum(homePrice.value);
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
@@ -259,14 +260,7 @@ const results = computed(() => {
     initialInv
   );
 
-  // Rent & invest: amount available for investing minus rent paid each month
-  const rentAdjustedMonthly = Math.max(monthlyInv - monthlyRentVal, 0);
-  const rentValue = futureValue(
-    rentAdjustedMonthly,
-    data.annualMarketReturn,
-    horizonYears,
-    initialInv
-  );
+  const rentValue = futureValue(monthlyInv, data.annualMarketReturn, horizonYears, initialInv);
 
   const downPayment = homePriceVal * (downPct / 100);
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);

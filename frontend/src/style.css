@@ -92,6 +92,10 @@ select {
   color: var(--muted);
 }
 
+.helper.helper-spacer {
+  visibility: hidden;
+}
+
 .results {
   display: grid;
   gap: 16px;
