@@ -118,19 +118,12 @@
       <div class="projection-header">
         <div>
           <h2>Net Worth Comparison</h2>
-          <p class="muted">
-            Projected total value (Assets - Debts) for both strategies over time.
-          </p>
+          <p class="muted">Assets minus Debts. Buy Strategy includes Home Equity.</p>
         </div>
         <div class="legend">
-      <span class="legend-item">
-        <span class="legend-swatch" style="background: var(--accent)"></span>
-        Rent Strategy
-      </span>
-          <span class="legend-item">
-        <span class="legend-swatch" style="background: #f28c3d"></span>
-        Buy Strategy
-      </span>
+          <span class="legend-item"><span class="legend-swatch" style="background: var(--accent)"></span> Rent</span>
+          <span class="legend-item"><span class="legend-swatch" style="background: #f28c3d"></span> Buy: Equity</span>
+          <span class="legend-item"><span class="legend-swatch" style="background: #4caf50"></span> Buy: Liquid</span>
         </div>
       </div>
 
@@ -141,25 +134,46 @@
           class="bar-group"
           :data-tooltip="`Year ${row.year}\nRent NW: ${formatCurrency(row.rentPortfolio)}\nBuy NW: ${formatCurrency(row.buyNetWorth)}`"
         >
-          <div
-            class="bar bar-rent"
-            :style="{ height: `${row.rentHeight}%` }"
-          ></div>
+          <div class="bar bar-rent" :style="{ height: `${row.rentHeight}%` }"></div>
 
-          <div
-            v-if="row.canAffordBuy"
-            class="bar-stack"
-            :style="{ height: `${row.buyTotalHeight}%` }"
-          >
+          <div v-if="row.canAffordBuy" class="bar-stack" :style="{ height: `${row.buyTotalHeight}%` }">
             <div class="bar bar-liquid" :style="{ flex: row.liquidFlex }"></div>
             <div class="bar bar-equity" :style="{ flex: row.equityFlex }"></div>
           </div>
+          <div v-else class="bar" style="border: 1px dashed var(--error); height: 5px; width: 12px;"></div>
 
-          <div
-            v-else
-            class="bar"
-            style="background: transparent; border: 1px dashed var(--error); height: 5px; width: 12px;"
-          ></div>
+          <span class="bar-label" v-if="row.year % 5 === 0 || row.year === 1">{{ row.year }}</span>
+        </div>
+      </div>
+
+      <div class="projection-header" style="border-top: 1px solid var(--border); padding-top: 20px;">
+        <div>
+          <h2>Property Asset vs. Rent Cost</h2>
+          <p class="muted">Home Value (with Debt overlay) vs. Cumulative Rent Paid.</p>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-swatch" style="background: #3d6df2"></span> Home Value</span>
+          <span class="legend-item">
+            <span class="legend-swatch" style="background: rgba(179, 38, 30, 0.6)"></span> Mortgage Debt
+          </span>
+          <span class="legend-item">
+            <span class="legend-swatch" style="background: transparent; border: 1px dashed #9fa3af"></span> Rent Paid
+          </span>
+        </div>
+      </div>
+
+      <div class="bar-chart" aria-hidden="true" style="margin-bottom: 2rem;">
+        <div
+          v-for="row in investmentSchedule"
+          :key="row.year"
+          class="bar-group"
+          :data-tooltip="`Year ${row.year}\nHome Val: ${formatCurrency(row.homeValue)}\nDebt: ${formatCurrency(row.mortgageDebt)}\nRent Paid: ${formatCurrency(row.totalRentPaid)}`"
+        >
+          <div class="bar bar-rent-paid" :style="{ height: `${row.rentPaidHeight}%` }"></div>
+
+          <div class="bar bar-home-val" :style="{ height: `${row.homeValHeight}%` }">
+            <div class="bar-debt" :style="{ height: `${row.debtHeight}%` }"></div>
+          </div>
 
           <span class="bar-label" v-if="row.year % 5 === 0 || row.year === 1">{{ row.year }}</span>
         </div>
@@ -168,29 +182,24 @@
       <div class="table-wrap">
         <table>
           <thead>
-          <tr>
-            <th scope="col">Year</th>
-            <th scope="col">Rent Net Worth</th>
-            <th scope="col">Buy Net Worth</th>
-            <th scope="col">Difference</th>
-            <th scope="col" class="muted">Liquid Assets (Buy)</th>
-          </tr>
+            <tr>
+              <th scope="col">Year</th>
+              <th scope="col">Rent Net Worth</th>
+              <th scope="col">Buy Net Worth</th>
+              <th scope="col">Diff</th>
+              <th scope="col" class="muted">Liquid (Buy)</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for="row in investmentSchedule" :key="row.year">
-            <th scope="row">{{ row.year }}</th>
-
-            <td>{{ formatCurrency(row.rentPortfolio) }}</td>
-
-            <td>{{ formatCurrency(row.buyNetWorth) }}</td>
-
-            <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
-              {{ row.buyNetWorth >= row.rentPortfolio ? '+' : '' }}
-              {{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
-            </td>
-
-            <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
-          </tr>
+            <tr v-for="row in investmentSchedule" :key="row.year">
+              <th scope="row">{{ row.year }}</th>
+              <td>{{ formatCurrency(row.rentPortfolio) }}</td>
+              <td>{{ formatCurrency(row.buyNetWorth) }}</td>
+              <td :style="{ color: row.buyNetWorth >= row.rentPortfolio ? '#2e7d32' : '#b3261e' }">
+                {{ row.buyNetWorth >= row.rentPortfolio ? '+' : '' }}{{ formatCurrency(row.buyNetWorth - row.rentPortfolio) }}
+              </td>
+              <td class="muted">{{ formatCurrency(row.buyStockPortfolio) }}</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -459,32 +468,43 @@ const investmentSchedule = computed(() => {
   const annualRate = data.annualMarketReturn;
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
 
-  // Buy Inputs
+  // --- Buy Scenario Inputs ---
   const homePriceVal = toNum(homePrice.value);
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
   const downPayment = homePriceVal * (downPct / 100);
-  const closingCosts = homePriceVal * 0.03;
+  const closingCosts = homePriceVal * 0.03; // 3% Closing Costs
+  const totalUpfrontCost = downPayment + closingCosts;
+
+  // Affordability Check
+  const canAffordBuy = initialInv >= totalUpfrontCost;
+
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
   const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
   const mortgagePayment = mortgageMonthlyPayment(mortgagePrincipal, data.mortgageRate, termYears);
-  const monthlyMaintenance = (homePriceVal * 0.01) / 12;
+  const monthlyMaintenance = (homePriceVal * 0.01) / 12; // 1% maintenance
 
-  const totalUpfrontCost = downPayment + closingCosts;
-  const canAffordBuy = initialInv >= totalUpfrontCost;
-
-  const buyInitialStockInvest = canAffordBuy ? initialInv - totalUpfrontCost : 0;
-
+  // --- Accumulators ---
   let rentPortfolio = initialInv;
-  let buyStockPortfolio = buyInitialStockInvest;
+  let buyStockPortfolio = canAffordBuy ? initialInv - totalUpfrontCost : 0;
   let rentCurrentCost = rentCostStart;
-  const rentInflation = 0.03;
+  let cumulativeRentPaid = 0;
+  const rentInflation = 0.03; // 3% Annual Rent Inflation
 
   const rows = [];
 
   for (let year = 1; year <= horizonYears; year++) {
+    // 1. RENT STRATEGY
     const rentMonthlyInvest = Math.max(monthlyInv - rentCurrentCost, 0);
     rentPortfolio = futureValue(rentMonthlyInvest, annualRate, 1, rentPortfolio, true);
-    rentCurrentCost *= 1 + rentInflation;
+
+    // Track Sunk Costs
+    cumulativeRentPaid += rentCurrentCost * 12;
+    rentCurrentCost *= 1 + rentInflation; // Inflate for next year
+
+    // 2. BUY STRATEGY
+    let homeEquity = 0;
+    let homeVal = 0;
+    let balance = 0;
 
     if (canAffordBuy) {
       const isMortgageActive = year <= termYears;
@@ -494,13 +514,13 @@ const investmentSchedule = computed(() => {
 
       const buyMonthlyInvest = Math.max(monthlyInv - currentHousingCost, 0);
       buyStockPortfolio = futureValue(buyMonthlyInvest, annualRate, 1, buyStockPortfolio, true);
+
+      // Asset Calculations
+      balance = mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year);
+      homeVal = homePriceVal * Math.pow(1 + data.annualHomeGrowth, year);
+      homeEquity = Math.max(homeVal - balance, 0);
     }
 
-    const balance = canAffordBuy
-      ? mortgageBalanceAfterYears(mortgagePrincipal, data.mortgageRate, termYears, year)
-      : 0;
-    const homeVal = homePriceVal * Math.pow(1 + data.annualHomeGrowth, year);
-    const homeEquity = canAffordBuy ? Math.max(homeVal - balance, 0) : 0;
     const buyNetWorth = canAffordBuy ? buyStockPortfolio + homeEquity : 0;
 
     rows.push({
@@ -509,18 +529,38 @@ const investmentSchedule = computed(() => {
       buyNetWorth,
       buyStockPortfolio,
       buyHomeEquity: homeEquity,
+      // Property Chart Data
+      homeValue: homeVal,
+      mortgageDebt: balance,
+      totalRentPaid: cumulativeRentPaid,
       canAffordBuy,
     });
   }
 
-  const globalMax = rows.reduce((acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth), 0);
+  // Scaling Factors
+  const netWorthMax = rows.reduce(
+    (acc, row) => Math.max(acc, row.rentPortfolio, row.buyNetWorth),
+    0
+  );
+  const propertyMax = rows.reduce(
+    (acc, row) => Math.max(acc, row.homeValue, row.totalRentPaid),
+    0
+  );
 
   return rows.map(row => ({
     ...row,
-    rentHeight: globalMax > 0 ? (row.rentPortfolio / globalMax) * 100 : 0,
-    buyTotalHeight: globalMax > 0 ? (row.buyNetWorth / globalMax) * 100 : 0,
+    // Chart 1 Heights (Net Worth)
+    rentHeight: netWorthMax > 0 ? (row.rentPortfolio / netWorthMax) * 100 : 0,
+    buyTotalHeight: netWorthMax > 0 ? (row.buyNetWorth / netWorthMax) * 100 : 0,
+    // Flex ratios for Stacked Bar (relative to itself)
     liquidFlex: row.buyStockPortfolio,
     equityFlex: row.buyHomeEquity,
+
+    // Chart 2 Heights (Property Analysis)
+    homeValHeight: propertyMax > 0 ? (row.homeValue / propertyMax) * 100 : 0,
+    rentPaidHeight: propertyMax > 0 ? (row.totalRentPaid / propertyMax) * 100 : 0,
+    // Debt is % of Home Value Bar (Overlay)
+    debtHeight: row.homeValue > 0 ? (row.mortgageDebt / row.homeValue) * 100 : 0,
   }));
 });
 </script>
