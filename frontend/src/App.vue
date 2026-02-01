@@ -32,9 +32,9 @@
           <p class="helper helper-spacer">Spacer</p>
         </div>
         <div class="field">
-          <label for="monthly">Monthly investment</label>
+          <label for="monthly">Monthly cash available</label>
           <input id="monthly" type="number" min="0" step="50" v-model.number="monthlyInvestment" />
-          <p class="helper">Amount invested each month across the scenarios.</p>
+          <p class="helper">Monthly amount before housing costs (rent or mortgage).</p>
         </div>
         <div class="field">
           <label for="initial">Initial lump sum</label>
@@ -249,6 +249,7 @@ const results = computed(() => {
   const monthlyInv = toNum(monthlyInvestment.value);
   const initialInv = toNum(initialInvestment.value);
   const horizonYears = Math.max(1, Math.floor(toNum(years.value, 1)));
+  const rentCost = toNum(monthlyRent.value);
   const homePriceVal = toNum(homePrice.value);
   const downPct = Math.min(100, Math.max(0, toNum(downPaymentPercent.value)));
   const termYears = Math.max(1, Math.floor(toNum(mortgageYears.value, 1)));
@@ -260,7 +261,13 @@ const results = computed(() => {
     initialInv
   );
 
-  const rentValue = futureValue(monthlyInv, data.annualMarketReturn, horizonYears, initialInv);
+  const rentInvestment = Math.max(monthlyInv - rentCost, 0);
+  const rentValue = futureValue(
+    rentInvestment,
+    data.annualMarketReturn,
+    horizonYears,
+    initialInv
+  );
 
   const downPayment = homePriceVal * (downPct / 100);
   const mortgagePrincipal = Math.max(homePriceVal - downPayment, 0);
@@ -271,18 +278,20 @@ const results = computed(() => {
   );
   const mortgageInitialInvestment = Math.max(initialInv - downPayment, 0);
   const investmentAfterMortgage = Math.max(monthlyInv - mortgagePayment, 0);
+  const mortgageYearsPaid = Math.min(horizonYears, termYears);
+  const remainingYears = Math.max(horizonYears - termYears, 0);
   const investmentDuringMortgage = futureValue(
     investmentAfterMortgage,
     data.annualMarketReturn,
-    horizonYears,
+    mortgageYearsPaid,
     mortgageInitialInvestment
   );
   const mortgageInvestmentValue =
-      investmentAfterMortgage > 0
+    remainingYears > 0
       ? futureValue(
-          monthlyInvestment.value,
+          monthlyInv,
           data.annualMarketReturn,
-            investmentAfterMortgage,
+          remainingYears,
           investmentDuringMortgage
         )
       : investmentDuringMortgage;
